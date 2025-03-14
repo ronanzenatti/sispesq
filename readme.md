@@ -2,7 +2,7 @@
 
 O SisPesq é uma aplicação web desenvolvida para facilitar o gerenciamento de projetos de pesquisa acadêmica, permitindo colaboração entre pesquisadores, documentação de eventos científicos, e gestão de referências bibliográficas.
 
-![SisPesq Logo](https://via.placeholder.com/400x100?text=SisPesq)
+![SisPesq Logo](static/img/logo.svg)
 
 ## 📋 Funcionalidades
 

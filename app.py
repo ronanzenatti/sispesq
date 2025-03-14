@@ -222,6 +222,40 @@ def cadastro():
     instituicoes = Instituicao.query.all()
     return render_template('cadastro.html', instituicoes=instituicoes)
 
+@app.route('/pesquisador/novo', methods=['GET', 'POST'])
+def novo_pesquisador():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        nome = request.form.get('nome')
+        instituicao_id = request.form.get('instituicao_id')
+        
+        # Verificar se o e-mail já está sendo usado
+        if Usuario.query.filter_by(email=email).first():
+            flash('E-mail já cadastrado', 'danger')
+            return redirect(url_for('cadastro'))
+        
+        # Criar novo usuário
+        novo_usuario = Usuario(email=email)
+        novo_usuario.set_senha(senha)
+        db.session.add(novo_usuario)
+        db.session.flush()  # Para obter o ID do usuário
+        
+        # Criar registro de pesquisador
+        novo_pesquisador = Pesquisador(
+            usuario_id=novo_usuario.id,
+            nome=nome,
+            instituicao_id=instituicao_id
+        )
+        db.session.add(novo_pesquisador)
+        db.session.commit()
+        
+        flash('Pesquisador criado com sucesso!', 'success')
+        return redirect(url_for('novo_perfil', usuario_id=novo_usuario.id))
+    
+    instituicoes = Instituicao.query.all()
+    return render_template('novo_pesquisador.html', instituicoes=instituicoes)
+
 
 @app.route('/logout')
 @login_required
@@ -690,6 +724,25 @@ def perfil():
                          projetos_em_andamento=projetos_em_andamento,
                          projetos_concluidos=projetos_concluidos)
 
+@app.route('/perfil/<int:usuario_id>')
+@login_required
+def novo_perfil(usuario_id):
+    usuario = Usuario.query.get_or_404(usuario_id)
+    # Total de projetos
+    total_projetos = len(usuario.pesquisador.projetos)
+    
+    # Projetos em andamento
+    projetos_em_andamento = sum(1 for p in usuario.pesquisador.projetos if p.status == 'Em andamento')
+    
+    # Projetos concluídos
+    projetos_concluidos = sum(1 for p in usuario.pesquisador.projetos if p.status == 'Concluído')
+    
+    return render_template('perfil.html', 
+                         usuario=usuario,
+                         total_projetos=total_projetos,
+                         projetos_em_andamento=projetos_em_andamento,
+                         projetos_concluidos=projetos_concluidos)
+
 
 @app.route('/perfil/editar', methods=['GET', 'POST'])
 @login_required
@@ -1134,4 +1187,4 @@ def criar_admin(email, senha, nome):
 
 # Executar o aplicativo
 if __name__ == '__main__':
-    aapp.run(host='127.0.0.1', port=8088, debug=True)z
+    aapp.run(host='127.0.0.1', port=8088, debug=True)

@@ -61,10 +61,10 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Entrar</a>
+                        <a class="nav-link active" href="{{ url_for('cadastro') }}">Cadastrar</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('cadastro') }}">Cadastrar</a>
+                    <li class="nav-item ms-3">
+                        <a class="btn btn-light text-primary" href="{{ url_for('login') }}">Entrar</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -158,7 +158,8 @@
 
     <footer class="bg-light text-center text-muted py-3 mt-4">
         <div class="container">
-            <p class="mb-0">Sistema de Gerenciamento de Projetos de Pesquisa &copy; 2023</p>
+            <p class="mb-0">Sistema de Gerenciamento de Projetos de Pesquisa &copy; 
+                2025 - <a target="_blank" href="https://www.linkedin.com/in/ronanzenatti/">Prof. Ronan Adriel Zenatti</a></p>
         </div>
     </footer>
 

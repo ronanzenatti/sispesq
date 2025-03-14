@@ -7,46 +7,49 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h1 class="display-4">SisPesq</h1>
+                        <h1 class="bold text-primary fw-bold">SisPesq</h1>
                         <p class="lead">Sistema de Gerenciamento de Projetos de Pesquisa Acadêmica</p>
-                        <p>Plataforma completa para gerenciar projetos de pesquisa, colaboradores, eventos e produções acadêmicas.</p>
-                        <div class="d-grid gap-2 d-md-flex">
-                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Acessar</a>
-                            <a href="{{ url_for('cadastro') }}" class="btn btn-outline-primary btn-lg">Cadastre-se</a>
-                        </div>
+                        <hr>
+                        <p>Plataforma completa para gerenciar projetos de pesquisa, colaboradores, eventos e produções
+                            acadêmicas.</p>
                     </div>
-                    <div class="col-md-6 text-center">
-                        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="SisPesq" class="img-fluid rounded">
+                    <div class="col-md-6 text-center d-flex align-items-center justify-content-center">
+                        <div class="text-center w-100">
+                            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="SisPesq"
+                                class="img-fluid rounded" style="box-shadow: 3px 5px 10px #ccc;">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
+        </div>        
         <div class="row mt-4">
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card card-project h-100">
                     <div class="card-body text-center">
                         <i class="bi bi-folder-check display-4 text-primary"></i>
                         <h3 class="card-title">Gerencie Projetos</h3>
-                        <p class="card-text">Cadastre e gerencie projetos de pesquisa, documentando todas as etapas e resultados.</p>
+                        <p class="card-text">Cadastre e gerencie projetos de pesquisa, documentando todas as etapas e
+                            resultados.</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card card-project h-100">
                     <div class="card-body text-center">
                         <i class="bi bi-people display-4 text-primary"></i>
                         <h3 class="card-title">Colaboração</h3>
-                        <p class="card-text">Adicione colaboradores aos seus projetos e acompanhe suas contribuições.</p>
+                        <p class="card-text">Adicione colaboradores aos seus projetos e acompanhe suas contribuições.
+                        </p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card card-project h-100">
                     <div class="card-body text-center">
                         <i class="bi bi-journal-text display-4 text-primary"></i>
                         <h3 class="card-title">Produção Acadêmica</h3>
-                        <p class="card-text">Registre publicações, participações em eventos e outras produções acadêmicas.</p>
+                        <p class="card-text">Registre publicações, participações em eventos e outras produções
+                            acadêmicas.</p>
                     </div>
                 </div>
             </div>

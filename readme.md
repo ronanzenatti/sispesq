@@ -1,199 +1,114 @@
-# Guia Completo para Configurar e Executar o SisPesq no Windows
+# Sistema de Gerenciamento de Projetos de Pesquisa (SisPesq)
 
-## 1. Preparação do Ambiente
+O SisPesq é uma aplicação web desenvolvida para facilitar o gerenciamento de projetos de pesquisa acadêmica, permitindo colaboração entre pesquisadores, documentação de eventos científicos, e gestão de referências bibliográficas.
 
-### 1.1 Instalar o Python
-1. Baixe o Python 3.11 (recomendado) do [site oficial](https://www.python.org/downloads/windows/)
-2. Durante a instalação, marque a opção "Add Python to PATH"
-3. Conclua a instalação
+![SisPesq Logo](https://via.placeholder.com/400x100?text=SisPesq)
 
-### 1.2 Verificar a Instalação
-Abra o Prompt de Comando (CMD) e digite:
-```
-python --version
-pip --version
-```
+## 📋 Funcionalidades
 
-## 2. Configurar o Projeto
+- **Gestão de Projetos**
+  - Cadastro e acompanhamento de projetos de pesquisa
+  - Definição de datas e prazos
+  - Categorização por área de conhecimento
+  - Controle de status (Em andamento, Concluído, etc.)
 
-### 2.1 Criar a Estrutura de Diretórios
-Crie a seguinte estrutura de pastas:
-```
-C:\projetos\pesquisa-app\
-  ├── app.py                 (Arquivo principal)
-  ├── templates\             (Pasta para os templates HTML)
-  │    ├── base.html
-  │    ├── index.html
-  │    ├── login.html
-  │    ├── cadastro.html
-  │    └── ... (outros templates)
-  └── static\                (Pasta para arquivos estáticos)
-       ├── css\
-       ├── js\
-       └── img\
-```
+- **Colaboração**
+  - Adicione múltiplos pesquisadores aos projetos
+  - Defina funções (Coordenador, Pesquisador, Bolsista, etc.)
+  - Acompanhe as contribuições de cada membro
 
-### 2.2 Corrigir o Código do app.py
-Abra o arquivo app.py e adicione as seguintes linhas no início (se não existirem):
-```python
-import json
-import click
-```
+- **Produção Acadêmica**
+  - Registro de participações em eventos científicos
+  - Gerenciamento de referências bibliográficas
+  - Vinculação de publicações aos projetos
 
-### 2.3 Configurar o Ambiente Virtual
-1. Abra o CMD como administrador
-2. Navegue até a pasta do projeto:
-```
-cd C:\projetos\pesquisa-app
-```
+- **Relatórios e Estatísticas**
+  - Painéis visuais com gráficos e estatísticas
+  - Acompanhamento de prazos e alertas
+  - Exportação de dados em formatos CSV e JSON
 
-3. Crie um ambiente virtual com Python 3.11:
-```
-python -m venv venv
-```
+- **Integração com Plataformas Acadêmicas**
+  - Suporte a ID Lattes e ORCID
+  - Adaptado ao contexto acadêmico brasileiro
 
-4. Ative o ambiente virtual:
-```
-venv\Scripts\activate
-```
+## 💻 Requisitos do Sistema
 
-### 2.4 Instalar as Dependências
-Com o ambiente virtual ativado, instale as dependências:
-```
-pip install Flask==2.2.3
-pip install Flask-SQLAlchemy==3.0.3
-pip install SQLAlchemy==2.0.4
-pip install Flask-Login==0.6.2
-pip install Flask-Migrate==4.0.4
-pip install Werkzeug==2.2.3
-pip install click==8.1.3
-pip install Jinja2==3.1.2
-```
+- Windows 8/10/11
+- Python 3.11 ou superior
+- Navegador web moderno (Chrome, Firefox, Edge)
+- 100MB de espaço em disco
+- Conexão com internet (para bibliotecas CDN)
 
-Alternativamente, você pode criar um arquivo `requirements.txt` com o conteúdo acima e instalar com:
-```
-pip install -r requirements.txt
-```
+## 🚀 Instalação e Execução
 
-## 3. Configuração do Banco de Dados
+### Instalação
 
-### 3.1 Configurar Variáveis de Ambiente
-```
-set FLASK_APP=app.py
-set FLASK_ENV=development
-set SECRET_KEY=chave-secreta-para-desenvolvimento
-```
+1. **Instale o Python 3.11**
+   - Baixe do [site oficial](https://www.python.org/downloads/windows/)
+   - Selecione "Add Python to PATH" durante a instalação
 
-### 3.2 Inicializar o Banco de Dados
-```
-flask db init
-flask db migrate -m "Criação inicial do banco de dados"
-flask db upgrade
-```
+2. **Clone ou baixe este repositório**
+   - Extraia os arquivos para uma pasta, por exemplo `C:\projetos\pesquisa-app`
 
-### 3.3 Carregar Dados de Exemplo (Opcional)
-```
-flask inicializar_db
-```
+3. **Configure o ambiente virtual**
+   ```
+   cd C:\projetos\pesquisa-app
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-### 3.4 Criar um Usuário Administrador
-```
-flask criar_admin admin@example.com senha123 "Administrador"
-```
+### Execução
 
-## 4. Executar a Aplicação
+1. **Inicialize o banco de dados**
+   ```
+   set FLASK_APP=app.py
+   flask db init
+   flask db migrate -m "Inicialização do banco de dados"
+   flask db upgrade
+   flask inicializar_db
+   ```
 
-### 4.1 Usando Portas Alternativas
-Para evitar conflitos com outros serviços:
-```
-flask run --port=8080
-```
+2. **Execute a aplicação**
+   ```
+   python app.py
+   ```
+   Ou use o arquivo `iniciar.bat` incluído no projeto.
 
-Ou diretamente usando Python:
-```
-python app.py
-```
+3. **Acesse a aplicação**
+   - Abra seu navegador e acesse `http://localhost:8080`
+   - Login padrão:
+     - E-mail: admin@example.com
+     - Senha: admin123
 
-### 4.2 Em Caso de Erro de Permissão de Socket
-Se encontrar o erro "Foi feita uma tentativa de acesso a um soquete de uma maneira que é proibida pelas permissões de acesso":
+## 🔧 Resolução de Problemas
 
-1. Tente outra porta:
-```
-flask run --port=8088
-```
+- **Erro de porta em uso**: Use uma porta alternativa modificando a linha no arquivo app.py:
+  ```python
+  app.run(host='127.0.0.1', port=8088, debug=True)
+  ```
 
-2. Execute como administrador:
-   - Abra o CMD como administrador
-   - Navegue até a pasta do projeto e ative o ambiente virtual
-   - Execute o comando acima
+- **Erros no banco de dados**: Remova o arquivo de banco de dados e reinicialize:
+  ```
+  del instance\projetos_pesquisa.db
+  flask db upgrade
+  flask inicializar_db
+  ```
 
-3. Modifique o arquivo app.py para usar uma porta específica:
-```python
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
-```
+- **Problemas de permissão**: Execute o cmd como administrador ao iniciar a aplicação
 
-## 5. Solução de Problemas Comuns
+## 📚 Tecnologias Utilizadas
 
-### 5.1 Problemas com Templates
-Se os templates não carregarem corretamente:
-1. Verifique se todos os arquivos estão na pasta `templates`
-2. Certifique-se de que o arquivo `base.html` existe e está completo
-3. Verifique se os templates estão estendendo `base.html` corretamente
+- **Backend**: Python + Flask
+- **ORM**: SQLAlchemy
+- **Frontend**: Bootstrap 5 + JavaScript
+- **Gráficos**: Chart.js
+- **Banco de Dados**: SQLite (em desenvolvimento), PostgreSQL (em produção)
 
-### 5.2 Problemas com o Banco de Dados
-Se houver erros relacionados ao banco de dados:
-```
-# Remova o banco de dados e crie novamente
-del instance\projetos_pesquisa.db
-flask db upgrade
-flask inicializar_db
-```
+## 🤝 Contribuição
 
-### 5.3 Problemas com Bibliotecas
-Se houver conflitos ou erros com versões de bibliotecas:
-```
-# Desative o ambiente atual
-deactivate
-# Crie um novo ambiente
-python -m venv venv_novo
-# Ative o novo ambiente
-venv_novo\Scripts\activate
-# Instale as dependências específicas
-pip install -r requirements.txt
-```
+Sinta-se à vontade para contribuir com este projeto criando issues ou enviando pull requests.
 
-### 5.4 Verificando Processos em Execução nas Portas
-```
-netstat -ano | findstr :5000
-netstat -ano | findstr :8080
-```
+## 📄 Licença
 
-## 6. Criando um Atalho para Execução Rápida
-
-Crie um arquivo `iniciar.bat` na pasta do projeto com o seguinte conteúdo:
-
-```batch
-@echo off
-cd C:\projetos\pesquisa-app
-call venv\Scripts\activate
-set FLASK_APP=app.py
-set FLASK_ENV=development
-python -m flask run --port=8080
-pause
-```
-
-Você pode criar um atalho para este arquivo no desktop para iniciar rapidamente a aplicação.
-
-## 7. Acesso à Aplicação
-
-Após iniciar o servidor, acesse a aplicação no navegador usando:
-```
-http://localhost:8080
-```
-
-Faça login com o usuário administrador criado anteriormente:
-- E-mail: admin@example.com
-- Senha: senha123
-
-Ou crie um novo usuário pelo formulário de cadastro.
+Este projeto está licenciado sob a licença MIT - consulte o arquivo LICENSE para obter detalhes.

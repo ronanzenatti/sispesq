@@ -1134,4 +1134,4 @@ def criar_admin(email, senha, nome):
 
 # Executar o aplicativo
 if __name__ == '__main__':
-    app.run(debug=True)
+    aapp.run(host='127.0.0.1', port=8088, debug=True)z

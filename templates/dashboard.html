@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total de Projetos</h5>
+                <h2 class="display-4">{{ total_projetos }}</h2>
+                <p class="card-text"><i class="bi bi-folder"></i> Projetos ativos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Eventos</h5>
+                <h2 class="display-4">{{ total_eventos }}</h2>
+                <p class="card-text"><i class="bi bi-calendar-event"></i> Participações</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Próximos Prazos</h5>
+                <h2 class="display-4">{{ projetos_proximos|length }}</h2>
+                <p class="card-text"><i class="bi bi-alarm"></i> Nos próximos 30 dias</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Projetos por Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartStatus" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Projetos por Área</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartArea" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Projetos com Prazos Próximos</h5>
+            </div>
+            <div class="card-body">
+                {% if projetos_proximos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Projeto</th>
+                                <th>Data Limite</th>
+                                <th>Dias Restantes</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for projeto in projetos_proximos %}
+                            <tr>
+                                <td>{{ projeto.nome }}</td>
+                                <td>{{ projeto.data_fim.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% set dias = (projeto.data_fim - now().date()).days %}
+                                    {% if dias <= 7 %} <span class="badge bg-danger">{{ dias }} dias</span>
+                                        {% elif dias <= 15 %} <span class="badge bg-warning text-dark">{{ dias }}
+                                            dias</span>
+                                            {% else %}
+                                            <span class="badge bg-info">{{ dias }} dias</span>
+                                            {% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">{{ projeto.status }}</span></td>
+                                <td>
+                                    <a href="{{ url_for('visualizar_projeto', projeto_id=projeto.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Não há projetos com prazos próximos.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Buscar dados para os gráficos
+        fetch('/api/projetos/estatisticas')
+            .then(response => response.json())
+            .then(data => {
+                // Gráfico de Status
+                const statusLabels = Object.keys(data.status || {});
+                const statusData = Object.values(data.status || {});
+                const statusChart = new Chart(document.getElementById('chartStatus'), {
+                    type: 'pie',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusData,
+                            backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6c757d']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+
+                // Gráfico de Áreas
+                const areaLabels = Object.keys(data.areas || {});
+                const areaData = Object.values(data.areas || {});
+                const areaChart = new Chart(document.getElementById('chartArea'), {
+                    type: 'bar',
+                    data: {
+                        labels: areaLabels,
+                        datasets: [{
+                            label: 'Projetos',
+                            data: areaData,
+                            backgroundColor: '#0d6efd'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Adicionar Pesquisador ao Projeto</h1>
+    <a href="{{ url_for('visualizar_projeto', projeto_id=projeto.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Projeto: {{ projeto.nome }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="email_pesquisador" class="form-label">E-mail do Pesquisador</label>
+                <input type="email" class="form-control" id="email_pesquisador" name="email_pesquisador" required>
+                <div class="form-text">Digite o e-mail do pesquisador cadastrado no sistema.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="funcao" class="form-label">Função no Projeto</label>
+                <select class="form-select" id="funcao" name="funcao" required>
+                    <option value="Pesquisador">Pesquisador</option>
+                    <option value="Colaborador">Colaborador</option>
+                    <option value="Bolsista">Bolsista</option>
+                    <option value="Orientando">Orientando</option>
+                    <option value="Coorientador">Coorientador</option>
+                </select>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Adicionar Pesquisador</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

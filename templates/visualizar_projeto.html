@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Visualizar Projeto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ projeto.nome }}</h1>
+    <div>
+        <a href="{{ url_for('editar_projeto', projeto_id=projeto.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{{ url_for('lista_projetos') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Informações do Projeto</h5>
+                <span
+                    class="badge {% if projeto.status == 'Em andamento' %}bg-primary{% elif projeto.status == 'Concluído' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ projeto.status }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Área de Conhecimento:</strong> {{ projeto.area_conhecimento }}</p>
+                        <p><strong>Data de Início:</strong> {{ projeto.data_inicio.strftime('%d/%m/%Y') }}</p>
+                        <p><strong>Data de Término:</strong>
+                            {% if projeto.data_fim %}
+                            {{ projeto.data_fim.strftime('%d/%m/%Y') }}
+                            {% else %}
+                            Não definida
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Instituição:</strong> {{ projeto.instituicao.nome if projeto.instituicao else 'Não
+                            definida' }}</p>
+                        <p><strong>Criado em:</strong> {{ projeto.data_criacao.strftime('%d/%m/%Y') }}</p>
+                        <p><strong>Última atualização:</strong> {{ projeto.data_atualizacao.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                </div>
+
+                <h6>Descrição:</h6>
+                <p>{{ projeto.descricao }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Pesquisadores</h5>
+                <a href="{{ url_for('adicionar_pesquisador', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-person-plus"></i> Adicionar
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Função</th>
+                                <th>Instituição</th>
+                                <th>Data de Entrada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pesquisador in projeto.pesquisadores.all() %}
+                            <tr>
+                                <td>{{ pesquisador.nome }}</td>
+                                <td>Pesquisador</td>
+                                <td>{{ pesquisador.instituicao.sigla if pesquisador.instituicao else '' }}</td>
+                                <td>Atual</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Eventos</h5>
+                <a href="{{ url_for('adicionar_evento', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Adicionar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if projeto.eventos %}
+                <ul class="list-group">
+                    {% for evento in projeto.eventos %}
+                    <li class="list-group-item">
+                        <h6>{{ evento.nome }}</h6>
+                        <p class="mb-1"><small class="text-muted">{{ evento.tipo }}</small></p>
+                        <p class="mb-1">{{ evento.data_inicio.strftime('%d/%m/%Y') }}
+                            {% if evento.data_fim %}
+                            - {{ evento.data_fim.strftime('%d/%m/%Y') }}
+                            {% endif %}
+                        </p>
+                        <p class="mb-0"><small>{{ evento.cidade }}/{{ evento.estado }}</small></p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Nenhum evento registrado.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Referências</h5>
+                <a href="{{ url_for('adicionar_referencia', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Adicionar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if projeto.referencias %}
+                <ul class="list-group">
+                    {% for ref in projeto.referencias %}
+                    <li class="list-group-item">
+                        <p class="mb-1"><strong>{{ ref.titulo }}</strong></p>
+                        <p class="mb-1">{{ ref.autores }}</p>
+                        <p class="mb-0"><small class="text-muted">{{ ref.publicacao }}, {{ ref.ano }}</small></p>
+                        {% if ref.doi %}
+                        <p class="mb-0"><small>DOI: {{ ref.doi }}</small></p>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Nenhuma referência registrada.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

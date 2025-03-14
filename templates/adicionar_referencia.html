@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Adicionar Referência ao Projeto</h1>
+    <a href="{{ url_for('visualizar_projeto', projeto_id=projeto.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Projeto: {{ projeto.nome }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="tipo" class="form-label">Tipo de Referência</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="Artigo">Artigo</option>
+                        <option value="Livro">Livro</option>
+                        <option value="Capítulo de Livro">Capítulo de Livro</option>
+                        <option value="Tese">Tese</option>
+                        <option value="Dissertação">Dissertação</option>
+                        <option value="Anais">Artigo em Anais</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ano" class="form-label">Ano</label>
+                    <input type="number" class="form-control" id="ano" name="ano" min="1900" max="2100" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="autores" class="form-label">Autores</label>
+                <input type="text" class="form-control" id="autores" name="autores" required>
+                <div class="form-text">Separe os nomes dos autores com ponto-e-vírgula (;)</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="publicacao" class="form-label">Publicação/Periódico</label>
+                <input type="text" class="form-control" id="publicacao" name="publicacao">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="volume" class="form-label">Volume</label>
+                    <input type="text" class="form-control" id="volume" name="volume">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="numero" class="form-label">Número</label>
+                    <input type="text" class="form-control" id="numero" name="numero">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="paginas" class="form-label">Páginas</label>
+                    <input type="text" class="form-control" id="paginas" name="paginas">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="doi" class="form-label">DOI</label>
+                <input type="text" class="form-control" id="doi" name="doi">
+            </div>
+            
+            <div class="mb-3">
+                <label for="url" class="form-label">URL</label>
+                <input type="url" class="form-control" id="url" name="url">
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Adicionar Referência</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

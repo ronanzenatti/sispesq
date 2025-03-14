@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Pesquisadores</h1>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">Buscar Pesquisadores</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('lista_pesquisadores') }}" method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="q" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="q" name="q" value="{{ termo_busca }}">
+            </div>
+            <div class="col-md-4">
+                <label for="instituicao_id" class="form-label">Instituição</label>
+                <select class="form-select" id="instituicao_id" name="instituicao_id">
+                    <option value="">Todas</option>
+                    {% for instituicao in instituicoes %}
+                    <option value="{{ instituicao.id }}" {% if request.args.get('instituicao_id')==instituicao.id|string
+                        %}selected{% endif %}>
+                        {{ instituicao.sigla }} - {{ instituicao.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if pesquisadores %}
+<div class="row">
+    {% for pesquisador in pesquisadores %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ pesquisador.nome }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    {{ pesquisador.titulacao }}
+                    {% if pesquisador.instituicao %}
+                    - {{ pesquisador.instituicao.sigla }}
+                    {% endif %}
+                </h6>
+
+                {% if pesquisador.area_atuacao %}
+                <p class="card-text">
+                    <strong>Área de Atuação:</strong> {{ pesquisador.area_atuacao }}
+                </p>
+                {% endif %}
+
+                {% if pesquisador.lattes_id %}
+                <p class="mb-1">
+                    <a href="http://lattes.cnpq.br/{{ pesquisador.lattes_id }}" target="_blank" class="card-link">
+                        <i class="bi bi-file-earmark-text"></i> Currículo Lattes
+                    </a>
+                </p>
+                {% endif %}
+
+                {% if pesquisador.orcid %}
+                <p class="mb-1">
+                    <a href="https://orcid.org/{{ pesquisador.orcid }}" target="_blank" class="card-link">
+                        <i class="bi bi-person-badge"></i> ORCID
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Nenhum pesquisador encontrado com os filtros selecionados.
+</div>
+{% endif %}
+{% endblock %}

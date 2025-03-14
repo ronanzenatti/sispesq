@@ -1,0 +1,115 @@
+# Ambiente virtual
+venv/
+venv_py311/
+venv_novo/
+env/
+.env/
+
+# Arquivos de configuração Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Arquivos de banco de dados
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Logs
+*.log
+logs/
+log/
+
+# IDE e Editores
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.project
+.classpath
+.settings/
+.vs/
+.ipynb_checkpoints/
+*.sublime-project
+*.sublime-workspace
+
+# Arquivos de ambiente
+.env
+.flaskenv
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de configuração sensíveis
+config.py
+secret_config.py
+*_config.py
+*credentials*
+
+# Arquivos temporários
+.tmp/
+.temp/
+tmp/
+temp/
+
+# Uploads e arquivos de mídia
+uploads/
+media/
+static/uploads/
+
+# Arquivos de cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Arquivos específicos do Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Arquivos específicos do Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Arquivos específicos do Linux
+*~
+.directory
+.Trash-*
+
+# Migrações do Flask-Migrate/Alembic (opcional, baseado na preferência do projeto)
+# migrations/
+
+# Arquivos de backup
+*.bak
+*.backup
+*~.nib
+*.swp
+*.save

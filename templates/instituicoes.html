@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Instituições</h1>
+    <a href="{{ url_for('nova_instituicao') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nova Instituição
+    </a>
+</div>
+
+{% if instituicoes %}
+<div class="row">
+    {% for instituicao in instituicoes %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ instituicao.sigla }} - {{ instituicao.nome }}</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Tipo:</strong> {{ instituicao.tipo }}</p>
+                
+                {% if instituicao.cep %}
+                <p><strong>CEP:</strong> {{ instituicao.cep }}</p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="text-end">
+                    <span class="text-muted">{{ instituicao.pesquisadores|length }} pesquisadores vinculados</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Nenhuma instituição cadastrada.
+</div>
+{% endif %}
+{% endblock %}

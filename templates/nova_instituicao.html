@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Nova Instituição</h1>
+    <a href="{{ url_for('lista_instituicoes') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Informações da Instituição</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="nome" class="form-label">Nome da Instituição</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="sigla" class="form-label">Sigla</label>
+                    <input type="text" class="form-control" id="sigla" name="sigla" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="Universidade Pública">Universidade Pública</option>
+                    <option value="Universidade Privada">Universidade Privada</option>
+                    <option value="Instituto de Pesquisa">Instituto de Pesquisa</option>
+                    <option value="Centro Tecnológico">Centro Tecnológico</option>
+                    <option value="Empresa">Empresa</option>
+                    <option value="Outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="endereco" class="form-label">Endereço</label>
+                <input type="text" class="form-control" id="endereco" name="endereco">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="cidade" name="cidade" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado" required>
+                        <option value="AC">AC</option>
+                        <option value="AL">AL</option>
+                        <option value="AP">AP</option>
+                        <option value="AM">AM</option>
+                        <option value="BA">BA</option>
+                        <option value="CE">CE</option>
+                        <option value="DF">DF</option>
+                        <option value="ES">ES</option>
+                        <option value="GO">GO</option>
+                        <option value="MA">MA</option>
+                        <option value="MT">MT</option>
+                        <option value="MS">MS</option>
+                        <option value="MG">MG</option>
+                        <option value="PA">PA</option>
+                        <option value="PB">PB</option>
+                        <option value="PR">PR</option>
+                        <option value="PE">PE</option>
+                        <option value="PI">PI</option>
+                        <option value="RJ">RJ</option>
+                        <option value="RN">RN</option>
+                        <option value="RS">RS</option>
+                        <option value="RO">RO</option>
+                        <option value="RR">RR</option>
+                        <option value="SC">SC</option>
+                        <option value="SP">SP</option>
+                        <option value="SE">SE</option>
+                        <option value="TO">TO</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <input type="text" class="form-control" id="cep" name="cep">
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Cadastrar Instituição</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Meu Perfil</h1>
+    <a href="{{ url_for('editar_perfil') }}" class="btn btn-primary">
+        <i class="bi bi-pencil"></i> Editar Perfil
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Informações Básicas</h5>
+            </div>
+            <div class="card-body">
+                <h3 class="mb-3">{{ usuario.pesquisador.nome }}</h3>
+                <p><strong>E-mail:</strong> {{ usuario.email }}</p>
+                <p><strong>Membro desde:</strong> {{ usuario.data_cadastro.strftime('%d/%m/%Y') }}</p>
+                
+                {% if usuario.pesquisador.titulacao %}
+                <p><strong>Titulação:</strong> {{ usuario.pesquisador.titulacao }}</p>
+                {% endif %}
+                
+                {% if usuario.pesquisador.area_atuacao %}
+                <p><strong>Área de Atuação:</strong> {{ usuario.pesquisador.area_atuacao }}</p>
+                {% endif %}
+                
+                {% if usuario.pesquisador.instituicao %}
+                <p><strong>Instituição:</strong> {{ usuario.pesquisador.instituicao.nome }}</p>
+                
+                {% if usuario.pesquisador.departamento %}
+                <p><strong>Departamento:</strong> {{ usuario.pesquisador.departamento }}</p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Identificadores Acadêmicos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if usuario.pesquisador.lattes_id %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>Currículo Lattes</h5>
+                                <p>ID: {{ usuario.pesquisador.lattes_id }}</p>
+                                <a href="http://lattes.cnpq.br/{{ usuario.pesquisador.lattes_id }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i> Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if usuario.pesquisador.orcid %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>ORCID</h5>
+                                <p>ID: {{ usuario.pesquisador.orcid }}</p>
+                                <a href="https://orcid.org/{{ usuario.pesquisador.orcid }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i> Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if not usuario.pesquisador.lattes_id and not usuario.pesquisador.orcid %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Você ainda não adicionou identificadores acadêmicos ao seu perfil.
+                            <a href="{{ url_for('editar_perfil') }}" class="alert-link">Adicione agora!</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Estatísticas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3>{{ total_projetos }}</h3>
+                            <p class="text-muted mb-0">Projetos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3>{{ projetos_em_andamento }}</h3>
+                            <p class="text-muted mb-0">Em andamento</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3>{{ projetos_concluidos }}</h3>
+                            <p class="text-muted mb-0">Concluídos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

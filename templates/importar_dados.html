@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Importar/Exportar Dados</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Importar Dados</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="arquivo" class="form-label">Selecione um arquivo CSV</label>
+                        <input class="form-control" type="file" id="arquivo" name="arquivo" accept=".csv" required>
+                        <div class="form-text">
+                            O arquivo CSV deve conter as colunas: nome, descricao, area_conhecimento, data_inicio,
+                            data_fim (opcional), status (opcional)
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Importar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Exportar Dados</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">Projetos</h6>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('exportar_dados', tipo='projetos', formato='csv') }}"
+                        class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar para CSV
+                    </a>
+                    <a href="{{ url_for('exportar_dados', tipo='projetos', formato='json') }}"
+                        class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-code"></i> Exportar para JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Modelo de CSV para Importação</h5>
+    </div>
+    <div class="card-body">
+        <pre><code>nome,descricao,area_conhecimento,data_inicio,data_fim,status
+"Análise de Dados em Grande Escala","Descrição do projeto...","Ciência de Dados",2023-01-01,2024-12-31,Em andamento
+"Desenvolvimento de Algoritmos Eficientes","Outra descrição...","Algoritmos",2023-02-15,,Em andamento</code></pre>
+    </div>
+</div>
+{% endblock %}

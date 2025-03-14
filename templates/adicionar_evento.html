@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Adicionar Evento ao Projeto</h1>
+    <a href="{{ url_for('visualizar_projeto', projeto_id=projeto.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Projeto: {{ projeto.nome }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="evento_existente" class="form-label">Evento Existente</label>
+                <select class="form-select" id="evento_existente" name="evento_existente">
+                    <option value="0">-- Novo Evento --</option>
+                    {% for evento in eventos %}
+                    <option value="{{ evento.id }}">{{ evento.nome }} ({{ evento.data_inicio.strftime('%d/%m/%Y') }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div id="novo_evento">
+                <h6 class="mt-4 mb-3">Novo Evento</h6>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Nome do Evento</label>
+                        <input type="text" class="form-control" id="nome" name="nome">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo">
+                            <option value="Conferência">Conferência</option>
+                            <option value="Congresso">Congresso</option>
+                            <option value="Simpósio">Simpósio</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Seminário">Seminário</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="data_inicio" class="form-label">Data de Início</label>
+                        <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="data_fim" class="form-label">Data de Término</label>
+                        <input type="date" class="form-control" id="data_fim" name="data_fim">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="local" class="form-label">Local</label>
+                    <input type="text" class="form-control" id="local" name="local">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="data_participacao" class="form-label">Data da Participação</label>
+                <input type="date" class="form-control" id="data_participacao" name="data_participacao">
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Adicionar Evento</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const eventoSelect = document.getElementById('evento_existente');
+        const novoEventoDiv = document.getElementById('novo_evento');
+        
+        // Função para mostrar/ocultar o formulário de novo evento
+        function toggleNovoEvento() {
+            if (eventoSelect.value === '0') {
+                novoEventoDiv.style.display = 'block';
+                // Tornar os campos obrigatórios
+                document.getElementById('nome').required = true;
+                document.getElementById('data_inicio').required = true;
+            } else {
+                novoEventoDiv.style.display = 'none';
+                // Remover a obrigatoriedade dos campos
+                document.getElementById('nome').required = false;
+                document.getElementById('data_inicio').required = false;
+            }
+        }
+        
+        // Verificar o estado inicial
+        toggleNovoEvento();
+        
+        // Adicionar o evento change
+        eventoSelect.addEventListener('change', toggleNovoEvento);
+    });
+</script>
+{% endblock %}

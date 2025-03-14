@@ -251,7 +251,7 @@ def novo_pesquisador():
         db.session.commit()
         
         flash('Pesquisador criado com sucesso!', 'success')
-        return redirect(url_for('novo_perfil', usuario_id=novo_usuario.id))
+        return redirect(url_for('perfil', usuario_id=novo_usuario.id))
     
     instituicoes = Instituicao.query.all()
     return render_template('novo_pesquisador.html', instituicoes=instituicoes)
@@ -668,6 +668,27 @@ def lista_instituicoes():
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
     return render_template('instituicoes.html', instituicoes=instituicoes)
 
+@app.route('/instituicao/<int:instituicao_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_instituicao(instituicao_id):
+    instituicao = Instituicao.query.get_or_404(instituicao_id)
+
+    if request.method == 'POST':
+        instituicao.nome = request.form.get('nome')
+        instituicao.sigla = request.form.get('sigla')
+        instituicao.tipo = request.form.get('tipo')
+        instituicao.endereco = request.form.get('endereco')        
+        instituicao.cidade = request.form.get('cidade')        
+        instituicao.estado = request.form.get('estado')        
+        instituicao.cep = request.form.get('cep')
+        
+        db.session.commit()
+        
+        flash('Instituição atualizada com sucesso!', 'success')
+        return redirect(url_for('lista_instituicoes'))
+    
+    return render_template('editar_instituicao.html', instituicao=instituicao)    
+
 
 @app.route('/instituicao/nova', methods=['GET', 'POST'])
 @login_required
@@ -706,27 +727,9 @@ def nova_instituicao():
     return render_template('nova_instituicao.html')
 
 
-@app.route('/perfil')
-@login_required
-def perfil():
-    # Total de projetos
-    total_projetos = len(current_user.pesquisador.projetos)
-    
-    # Projetos em andamento
-    projetos_em_andamento = sum(1 for p in current_user.pesquisador.projetos if p.status == 'Em andamento')
-    
-    # Projetos concluídos
-    projetos_concluidos = sum(1 for p in current_user.pesquisador.projetos if p.status == 'Concluído')
-    
-    return render_template('perfil.html', 
-                         usuario=current_user,
-                         total_projetos=total_projetos,
-                         projetos_em_andamento=projetos_em_andamento,
-                         projetos_concluidos=projetos_concluidos)
-
 @app.route('/perfil/<int:usuario_id>')
 @login_required
-def novo_perfil(usuario_id):
+def perfil(usuario_id):
     usuario = Usuario.query.get_or_404(usuario_id)
     # Total de projetos
     total_projetos = len(usuario.pesquisador.projetos)
@@ -744,10 +747,10 @@ def novo_perfil(usuario_id):
                          projetos_concluidos=projetos_concluidos)
 
 
-@app.route('/perfil/editar', methods=['GET', 'POST'])
+@app.route('/perfil/editar/<int:usuario_id>', methods=['GET', 'POST'])
 @login_required
-def editar_perfil():
-    pesquisador = current_user.pesquisador
+def editar_perfil(usuario_id):
+    pesquisador = Usuario.query.get_or_404(usuario_id).pesquisador
     
     if request.method == 'POST':
         pesquisador.nome = request.form.get('nome')
@@ -761,10 +764,10 @@ def editar_perfil():
         db.session.commit()
         
         flash('Perfil atualizado com sucesso!', 'success')
-        return redirect(url_for('perfil'))
+        return redirect(url_for('perfil', usuario_id=usuario_id))
     
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
-    return render_template('editar_perfil.html', pesquisador=pesquisador, instituicoes=instituicoes)
+    return render_template('editar_perfil.html', usuario_id=usuario_id, pesquisador=pesquisador, instituicoes=instituicoes)
 
 
 @app.route('/relatorios')
@@ -1187,4 +1190,4 @@ def criar_admin(email, senha, nome):
 
 # Executar o aplicativo
 if __name__ == '__main__':
-    aapp.run(host='127.0.0.1', port=8088, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)

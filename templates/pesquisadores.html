@@ -72,6 +72,14 @@
                 </p>
                 {% endif %}
             </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-grid">
+                    <a href="{{ url_for('perfil', usuario_id=pesquisador.id) }}"
+                        class="btn btn-outline-primary">
+                        <i class="bi bi-eye"></i> Visualizar
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     {% endfor %}

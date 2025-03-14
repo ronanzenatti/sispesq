@@ -18,14 +18,28 @@
             </div>
             <div class="card-body">
                 <p><strong>Tipo:</strong> {{ instituicao.tipo }}</p>
-                
+
                 {% if instituicao.cep %}
-                <p><strong>CEP:</strong> {{ instituicao.cep }}</p>
+                <p><strong>Cidade:</strong> {{ instituicao.cidade }}</p>
                 {% endif %}
             </div>
             <div class="card-footer bg-transparent">
-                <div class="text-end">
-                    <span class="text-muted">{{ instituicao.pesquisadores|length }} pesquisadores vinculados</span>
+                <div class="row">
+                    <div class="col-md-7 d-flex align-itens-center" style="line-height: 2;">
+                        {% if instituicao.pesquisadores|length != 1 %}
+                        <span class="text-muted" style="font-size: 0.9rem;">{{ instituicao.pesquisadores|length }}
+                            pesquisadores vinculados</span>
+                        {% endif %}
+                        {% if instituicao.pesquisadores|length == 1 %}
+                        <span class="text-muted" style="font-size: 0.9rem;">{{ instituicao.pesquisadores|length }}
+                            pesquisador vinculado</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-5">
+                        <a href="{{ url_for('editar_instituicao', instituicao_id=instituicao.id) }}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

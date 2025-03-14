@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Instituição</h1>
+    <a href="{{ url_for('lista_instituicoes') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Informações da Instituição</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="nome" class="form-label">Nome da Instituição</label>
+                    <input type="text" class="form-control" id="nome" name="nome" value="{{ instituicao.nome }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="sigla" class="form-label">Sigla</label>
+                    <input type="text" class="form-control" id="sigla" value="{{ instituicao.sigla }}" name="sigla" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="Universidade Pública"  {% if instituicao.tipo == 'Universidade Pública' %}selected
+                    {% endif %}>Universidade Pública</option>
+                    <option value="Universidade Privada" {% if instituicao.tipo == 'Universidade Privada' %}selected
+                    {% endif %}>Universidade Privada</option>
+                    <option value="Instituto de Pesquisa" {% if instituicao.tipo == 'Universidade Pesquisa' %}selected
+                    {% endif %}>Instituto de Pesquisa</option>
+                    <option value="Centro Tecnológico" {% if instituicao.tipo == 'Centro Tecnológico' %}selected
+                    {% endif %}>Centro Tecnológico</option>
+                    <option value="Empresa" {% if instituicao.tipo == 'Empresa' %}selected{% endif %}>Empresa</option>
+                    <option value="Outro" {% if instituicao.tipo == 'Outro' %}selected{% endif %}>Outro</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="endereco" class="form-label">Endereço</label>
+                <input type="text" class="form-control" id="endereco" name="endereco"  value="{{ instituicao.endereco }}" >
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="cidade" name="cidade"  value="{{ instituicao.cidade }}"  required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado" required>
+                        <option value="AC" {% if instituicao.estado == 'AC' %}selected{% endif %}>AC</option>
+                        <option value="AL" {% if instituicao.estado == 'AL' %}selected{% endif %}>AL</option>
+                        <option value="AP" {% if instituicao.estado == 'AP' %}selected{% endif %}>AP</option>
+                        <option value="AM" {% if instituicao.estado == 'AM' %}selected{% endif %}>AM</option>
+                        <option value="BA" {% if instituicao.estado == 'BA' %}selected{% endif %}>BA</option>
+                        <option value="CE" {% if instituicao.estado == 'CE' %}selected{% endif %}>CE</option>
+                        <option value="DF" {% if instituicao.estado == 'DF' %}selected{% endif %}>DF</option>
+                        <option value="ES" {% if instituicao.estado == 'ES' %}selected{% endif %}>ES</option>
+                        <option value="GO" {% if instituicao.estado == 'GO' %}selected{% endif %}>GO</option>
+                        <option value="MA" {% if instituicao.estado == 'MA' %}selected{% endif %}>MA</option>
+                        <option value="MT" {% if instituicao.estado == 'MT' %}selected{% endif %}>MT</option>
+                        <option value="MS" {% if instituicao.estado == 'MS' %}selected{% endif %}>MS</option>
+                        <option value="MG" {% if instituicao.estado == 'MG' %}selected{% endif %}>MG</option>
+                        <option value="PA" {% if instituicao.estado == 'PA' %}selected{% endif %}>PA</option>
+                        <option value="PB" {% if instituicao.estado == 'PB' %}selected{% endif %}>PB</option>
+                        <option value="PR" {% if instituicao.estado == 'PR' %}selected{% endif %}>PR</option>
+                        <option value="PE" {% if instituicao.estado == 'PE' %}selected{% endif %}>PE</option>
+                        <option value="PI" {% if instituicao.estado == 'PI' %}selected{% endif %}>PI</option>
+                        <option value="RJ" {% if instituicao.estado == 'RJ' %}selected{% endif %}>RJ</option>
+                        <option value="RN" {% if instituicao.estado == 'RN' %}selected{% endif %}>RN</option>
+                        <option value="RS" {% if instituicao.estado == 'RS' %}selected{% endif %}>RS</option>
+                        <option value="RO" {% if instituicao.estado == 'RO' %}selected{% endif %}>RO</option>
+                        <option value="RR" {% if instituicao.estado == 'RR' %}selected{% endif %}>RR</option>
+                        <option value="SC" {% if instituicao.estado == 'SC' %}selected{% endif %}>SC</option>
+                        <option value="SP" {% if instituicao.estado == 'SP' %}selected{% endif %}>SP</option>
+                        <option value="SE" {% if instituicao.estado == 'SE' %}selected{% endif %}>SE</option>
+                        <option value="TO" {% if instituicao.estado == 'TO' %}selected{% endif %}>TO</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <input type="text" class="form-control" id="cep" name="cep" value="{{ instituicao.cep }}" >
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

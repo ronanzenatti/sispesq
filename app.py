@@ -168,6 +168,10 @@ def index():
     projetos_recentes = Projeto.query.order_by(Projeto.data_atualizacao.desc()).limit(5).all()
     return render_template('index.html', projetos=projetos_recentes)
 
+@app.route('/sobre')
+def sobre():   
+    return render_template('sobre.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -213,6 +217,7 @@ def cadastro():
             nome=nome,
             instituicao_id=instituicao_id
         )
+
         db.session.add(novo_pesquisador)
         db.session.commit()
         
@@ -220,7 +225,7 @@ def cadastro():
         return redirect(url_for('login'))
     
     instituicoes = Instituicao.query.all()
-    return render_template('cadastro.html', instituicoes=instituicoes)
+    return render_template('pesquisadores/cadastro.html', instituicoes=instituicoes)
 
 @app.route('/pesquisador/novo', methods=['GET', 'POST'])
 def novo_pesquisador():
@@ -247,6 +252,7 @@ def novo_pesquisador():
             nome=nome,
             instituicao_id=instituicao_id
         )
+
         db.session.add(novo_pesquisador)
         db.session.commit()
         
@@ -254,7 +260,7 @@ def novo_pesquisador():
         return redirect(url_for('perfil', usuario_id=novo_usuario.id))
     
     instituicoes = Instituicao.query.all()
-    return render_template('novo_pesquisador.html', instituicoes=instituicoes)
+    return render_template('pesquisadores/novo_pesquisador.html', instituicoes=instituicoes)
 
 
 @app.route('/logout')
@@ -268,12 +274,14 @@ def logout():
 @login_required
 def dashboard():
     pesquisador = current_user.pesquisador
-    
+    """
     # Projetos onde o usuário é pesquisador
     projetos = Projeto.query.join(projeto_pesquisador).filter(
         projeto_pesquisador.c.pesquisador_id == pesquisador.id,
         projeto_pesquisador.c.ativo == True
-    ).all()
+    ).all()"""
+    
+    projetos = Projeto.query.all()
     
     # Projetos próximos da data limite
 
@@ -283,8 +291,8 @@ def dashboard():
     data_limite = data_atual + timedelta(days=30)
 
     # Projetos próximos da data limite
-    projetos_proximos = Projeto.query.join(projeto_pesquisador).filter(
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
+    projetos_proximos = Projeto.query.filter(
+        #projeto_pesquisador.c.pesquisador_id == pesquisador.id,
         Projeto.data_fim != None,
         Projeto.data_fim >= data_atual,
         Projeto.data_fim <= data_limite
@@ -314,10 +322,11 @@ def lista_projetos():
     area = request.args.get('area')
     
     # Consulta base
-    query = Projeto.query.join(projeto_pesquisador).filter(
+    """query = Projeto.query.join(projeto_pesquisador).filter(
         projeto_pesquisador.c.pesquisador_id == pesquisador.id,
         projeto_pesquisador.c.ativo == True
-    )
+    )"""
+    query = Projeto.query
     
     # Aplicar filtros
     if status:
@@ -330,7 +339,7 @@ def lista_projetos():
     areas = db.session.query(Projeto.area_conhecimento).distinct().all()
     status_list = db.session.query(Projeto.status).distinct().all()
     
-    return render_template('projetos.html', 
+    return render_template('projetos/projetos.html', 
                           projetos=projetos,
                           areas=areas,
                           status_list=status_list)
@@ -341,7 +350,7 @@ def lista_projetos():
 def visualizar_projeto(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
-    # Verificar se o usuário tem acesso ao projeto
+    """ # Verificar se o usuário tem acesso ao projeto
     pesquisador = current_user.pesquisador
     participacao = db.session.query(projeto_pesquisador).filter(
         projeto_pesquisador.c.projeto_id == projeto_id,
@@ -350,9 +359,9 @@ def visualizar_projeto(projeto_id):
     
     if not participacao:
         flash('Você não tem acesso a este projeto', 'danger')
-        return redirect(url_for('lista_projetos'))
+        return redirect(url_for('lista_projetos'))"""
     
-    return render_template('visualizar_projeto.html', projeto=projeto)
+    return render_template('projetos/visualizar_projeto.html', projeto=projeto)
 
 
 @app.route('/projeto/novo', methods=['GET', 'POST'])
@@ -378,14 +387,14 @@ def novo_projeto():
             area_conhecimento=area_conhecimento,
             data_inicio=data_inicio,
             data_fim=data_fim,
-            instituicao_id=pesquisador.instituicao_id,
-            criador_id=pesquisador.id
+           # instituicao_id=pesquisador.instituicao_id,
+           # criador_id=pesquisador.id
         )
         
         db.session.add(novo_projeto)
         db.session.flush()
         
-        # Adicionar o criador como pesquisador do projeto
+        """# Adicionar o criador como pesquisador do projeto
         stmt = projeto_pesquisador.insert().values(
             projeto_id=novo_projeto.id,
             pesquisador_id=pesquisador.id,
@@ -393,21 +402,21 @@ def novo_projeto():
             data_entrada=datetime.now(),
             ativo=True
         )
-        db.session.execute(stmt)
+        db.session.execute(stmt)"""
         
         db.session.commit()
         
         flash('Projeto criado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=novo_projeto.id))
     
-    return render_template('novo_projeto.html')
+    return render_template('projetos/novo_projeto.html')
 
 
 @app.route('/projeto/<int:projeto_id>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_projeto(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
-    
+    """
     # Verificar se o usuário tem acesso ao projeto como coordenador
     pesquisador = current_user.pesquisador
     participacao = db.session.query(projeto_pesquisador).filter(
@@ -418,7 +427,7 @@ def editar_projeto(projeto_id):
     
     if not participacao:
         flash('Você não tem permissão para editar este projeto', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
     
     if request.method == 'POST':
         projeto.nome = request.form.get('nome')
@@ -433,7 +442,7 @@ def editar_projeto(projeto_id):
         flash('Projeto atualizado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
-    return render_template('editar_projeto.html', projeto=projeto)
+    return render_template('projetos/editar_projeto.html', projeto=projeto)
 
 
 @app.route('/projeto/<int:projeto_id>/adicionar_pesquisador', methods=['GET', 'POST'])
@@ -441,7 +450,7 @@ def editar_projeto(projeto_id):
 def adicionar_pesquisador(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
-    # Verificar se o usuário é coordenador do projeto
+    """ # Verificar se o usuário é coordenador do projeto
     pesquisador = current_user.pesquisador
     participacao = db.session.query(projeto_pesquisador).filter(
         projeto_pesquisador.c.projeto_id == projeto_id,
@@ -451,7 +460,7 @@ def adicionar_pesquisador(projeto_id):
     
     if not participacao:
         flash('Apenas o coordenador pode adicionar pesquisadores', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
     
     if request.method == 'POST':
         email_pesquisador = request.form.get('email_pesquisador')
@@ -490,7 +499,7 @@ def adicionar_pesquisador(projeto_id):
         flash('Pesquisador adicionado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
-    return render_template('adicionar_pesquisador.html', projeto=projeto)
+    return render_template('projetos/adicionar_pesquisador.html', projeto=projeto)
 
 
 @app.route('/projeto/<int:projeto_id>/adicionar_evento', methods=['GET', 'POST'])
@@ -499,7 +508,7 @@ def adicionar_evento(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
     # Verificar se o usuário tem acesso ao projeto
-    pesquisador = current_user.pesquisador
+    """pesquisador = current_user.pesquisador
     participacao = db.session.query(projeto_pesquisador).filter(
         projeto_pesquisador.c.projeto_id == projeto_id,
         projeto_pesquisador.c.pesquisador_id == pesquisador.id,
@@ -508,7 +517,7 @@ def adicionar_evento(projeto_id):
     
     if not participacao:
         flash('Você não tem permissão para adicionar eventos a este projeto', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
     
     if request.method == 'POST':
         # Verificar se é um evento existente ou novo
@@ -563,7 +572,7 @@ def adicionar_evento(projeto_id):
     # Lista de eventos existentes para seleção
     eventos = Evento.query.order_by(Evento.nome).all()
     
-    return render_template('adicionar_evento.html', projeto=projeto, eventos=eventos)
+    return render_template('projetos/adicionar_evento.html', projeto=projeto, eventos=eventos)
 
 
 @app.route('/projeto/<int:projeto_id>/adicionar_referencia', methods=['GET', 'POST'])
@@ -572,7 +581,7 @@ def adicionar_referencia(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
     # Verificar se o usuário tem acesso ao projeto
-    pesquisador = current_user.pesquisador
+    """pesquisador = current_user.pesquisador
     participacao = db.session.query(projeto_pesquisador).filter(
         projeto_pesquisador.c.projeto_id == projeto_id,
         projeto_pesquisador.c.pesquisador_id == pesquisador.id,
@@ -581,7 +590,7 @@ def adicionar_referencia(projeto_id):
     
     if not participacao:
         flash('Você não tem permissão para adicionar referências a este projeto', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
     
     if request.method == 'POST':
         tipo = request.form.get('tipo')
@@ -636,7 +645,7 @@ def adicionar_referencia(projeto_id):
         flash('Referência adicionada com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
-    return render_template('adicionar_referencia.html', projeto=projeto)
+    return render_template('projetos/adicionar_referencia.html', projeto=projeto)
 
 
 @app.route('/pesquisadores')
@@ -656,7 +665,7 @@ def lista_pesquisadores():
     pesquisadores = query.all()
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
     
-    return render_template('pesquisadores.html', 
+    return render_template('pesquisadores/pesquisadores.html', 
                           pesquisadores=pesquisadores, 
                           instituicoes=instituicoes,
                           termo_busca=termo_busca)
@@ -666,7 +675,7 @@ def lista_pesquisadores():
 @login_required
 def lista_instituicoes():
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
-    return render_template('instituicoes.html', instituicoes=instituicoes)
+    return render_template('instituicoes/instituicoes.html', instituicoes=instituicoes)
 
 @app.route('/instituicao/<int:instituicao_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -687,7 +696,7 @@ def editar_instituicao(instituicao_id):
         flash('Instituição atualizada com sucesso!', 'success')
         return redirect(url_for('lista_instituicoes'))
     
-    return render_template('editar_instituicao.html', instituicao=instituicao)    
+    return render_template('instituicoes/editar_instituicao.html', instituicao=instituicao)    
 
 
 @app.route('/instituicao/nova', methods=['GET', 'POST'])
@@ -724,7 +733,7 @@ def nova_instituicao():
         flash('Instituição cadastrada com sucesso!', 'success')
         return redirect(url_for('lista_instituicoes'))
     
-    return render_template('nova_instituicao.html')
+    return render_template('instituicoes/nova_instituicao.html')
 
 
 @app.route('/perfil/<int:usuario_id>')
@@ -740,7 +749,7 @@ def perfil(usuario_id):
     # Projetos concluídos
     projetos_concluidos = sum(1 for p in usuario.pesquisador.projetos if p.status == 'Concluído')
     
-    return render_template('perfil.html', 
+    return render_template('pesquisadores/perfil.html', 
                          usuario=usuario,
                          total_projetos=total_projetos,
                          projetos_em_andamento=projetos_em_andamento,
@@ -767,7 +776,7 @@ def editar_perfil(usuario_id):
         return redirect(url_for('perfil', usuario_id=usuario_id))
     
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
-    return render_template('editar_perfil.html', usuario_id=usuario_id, pesquisador=pesquisador, instituicoes=instituicoes)
+    return render_template('pesquisadores/editar_perfil.html', usuario_id=usuario_id, pesquisador=pesquisador, instituicoes=instituicoes)
 
 
 @app.route('/relatorios')
@@ -779,6 +788,7 @@ def relatorios():
 @app.route('/api/projetos/estatisticas')
 @login_required
 def api_estatisticas_projetos():
+    """
     pesquisador = current_user.pesquisador
     
     # Estatísticas dos projetos do pesquisador
@@ -787,7 +797,9 @@ def api_estatisticas_projetos():
         projeto_pesquisador.c.ativo == True
     ).all()
     
-    projetos_ids = [p[0] for p in projetos_ids]
+    projetos_ids = Projeto.query() """
+    
+    projetos_ids = [id[0] for id in Projeto.query.with_entities(Projeto.id).all()]
     
     # Total por status
     status_counts = db.session.query(
@@ -1186,7 +1198,6 @@ def criar_admin(email, senha, nome):
     db.session.commit()
     
     print(f'Administrador {nome} criado com sucesso!')
-
 
 # Executar o aplicativo
 if __name__ == '__main__':

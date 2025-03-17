@@ -1,0 +1,69 @@
+{% extends "base.html" %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Novo Pesquisador</h1>
+  <a
+    href="{{ url_for('lista_pesquisadores') }}"
+    class="btn btn-outline-secondary"
+  >
+    <i class="bi bi-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Informações do Pesquisador</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nome" class="form-label">Nome Completo</label>
+          <input
+            type="text"
+            class="form-control"
+            id="nome"
+            name="nome"
+            required
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="email" class="form-label">E-mail</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="senha" class="form-label">Senha</label>
+          <input
+            type="password"
+            class="form-control"
+            id="senha"
+            name="senha"
+            required
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="instituicao_id" class="form-label">Instituição</label>
+          <select class="form-select" id="instituicao_id" name="instituicao_id">
+            {% for instituicao in instituicoes %}
+            <option value="{{ instituicao.id }}">
+              {{ instituicao.sigla }} - {{ instituicao.nome }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Cadastrar Pesquisador</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

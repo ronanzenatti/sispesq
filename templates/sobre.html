@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre o Desenvolvedor{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Seção de cabeçalho com animação -->
+    <div class="row mb-5 fade-in">
+        <div class="col-md-12 text-center">
+            <h1 class="display-4 animate__animated animate__fadeInDown">Sobre o Desenvolvedor</h1>
+            <div class="divider animate__animated animate__fadeIn animate__delay-1s"></div>
+        </div>
+    </div>
+
+    <!-- Seção principal com foto e informações -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-5 mb-4 mb-md-0">
+            <div class="profile-card animate__animated animate__fadeInLeft">
+                <div class="profile-img-container">
+                    <img src="https://avatars.githubusercontent.com/u/5831467?v=4" alt="Foto do Desenvolvedor" class="img-fluid rounded-circle profile-img" onerror="this.src='{{ url_for('static', filename='img/default-profile.png') }}'">
+                </div>
+                <div class="social-icons mt-3">
+                    <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="profile-info animate__animated animate__fadeInRight">
+                <h2 class="mb-3">Olá, eu sou <span class="text-primary">Seu Nome</span></h2>
+                <h4 class="text-muted mb-4">Desenvolvedor & Professor</h4>
+                <p class="lead">
+                    Sou um apaixonado desenvolvedor de software e professor na Fatec Jahu, onde compartilho conhecimento e experiência com os futuros profissionais de tecnologia.
+                </p>
+                <p>
+                    Com anos de experiência no desenvolvimento de aplicações web e móveis, busco sempre utilizar as melhores práticas e tecnologias atuais para criar soluções eficientes e inovadoras.
+                </p>
+                <div class="skills-container mt-4">
+                    <span class="skill-badge">Python</span>
+                    <span class="skill-badge">Flask</span>
+                    <span class="skill-badge">HTML/CSS</span>
+                    <span class="skill-badge">JavaScript</span>
+                    <span class="skill-badge">SQL</span>
+                    <span class="skill-badge">Git</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de carreira -->
+    <div class="row mb-5 scroll-animation">
+        <div class="col-md-12">
+            <h3 class="section-title">Carreira Acadêmica</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Professor - Fatec Jahu</h4>
+                        <p class="text-muted">2015 - Presente</p>
+                        <p>Leciono disciplinas relacionadas ao desenvolvimento de software, banco de dados e programação web, contribuindo para a formação de novos profissionais na área de tecnologia.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Mestrado em Ciência da Computação</h4>
+                        <p class="text-muted">2010 - 2013</p>
+                        <p>Pesquisa focada em desenvolvimento de aplicações web e frameworks modernos.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Bacharelado em Ciência da Computação</h4>
+                        <p class="text-muted">2006 - 2009</p>
+                        <p>Formação com ênfase em desenvolvimento de software e algoritmos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de projetos -->
+    <div class="row mb-5 scroll-animation">
+        <div class="col-md-12">
+            <h3 class="section-title">Projetos Destacados</h3>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card project-card">
+                        <div class="card-body">
+                            <div class="project-icon"><i class="fas fa-search"></i></div>
+                            <h4 class="card-title">Sistema de Pesquisa</h4>
+                            <p class="card-text">Aplicação web para coleta e análise de dados de pesquisas acadêmicas.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card project-card">
+                        <div class="project-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <h4 class="card-title">Plataforma EAD</h4>
+                        <p class="card-text">Sistema de ensino à distância com recursos interativos e gamificação.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card project-card">
+                        <div class="project-icon"><i class="fas fa-code"></i></div>
+                        <h4 class="card-title">API de Gestão</h4>
+                        <p class="card-text">Backend robusto para sistemas de gestão empresarial com Flask.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de contato -->
+    <div class="row scroll-animation">
+        <div class="col-md-12 text-center">
+            <h3 class="section-title">Entre em Contato</h3>
+            <p class="lead mb-4">Estou sempre aberto a novas oportunidades de colaboração e projetos interessantes.</p>
+            <a href="mailto:seu-email@exemplo.com" class="btn btn-primary btn-lg contact-btn">
+                <i class="fas fa-envelope me-2"></i> Enviar Email
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- CSS personalizado -->
+<style>
+    .divider {
+        height: 4px;
+        width: 70px;
+        background-color: #007bff;
+        margin: 20px auto;
+    }
+    
+    .profile-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .profile-img-container {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .social-icon {
+        font-size: 22px;
+        margin: 0 10px;
+        color: #007bff;
+        transition: all 0.3s;
+    }
+    
+    .social-icon:hover {
+        transform: translateY(-5px);
+        color: #0056b3;
+    }
+    
+    .skill-badge {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 8px 15px;
+        background-color: #f8f9fa;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .section-title {
+        position: relative;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 50px;
+        background-color: #007bff;
+    }
+    
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 18px;
+        height: 100%;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 60px;
+        margin-bottom: 40px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        top: 5px;
+        left: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 5px solid #fff;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+    
+    .project-card {
+        transition: all 0.3s;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+    
+    .project-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    }
+    
+    .project-icon {
+        font-size: 40px;
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+    
+    .contact-btn {
+        border-radius: 50px;
+        padding: 12px 30px;
+        transition: all 0.3s;
+    }
+    
+    .contact-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,123,255,0.3);
+    }
+    
+    /* Animações */
+    .fade-in {
+        animation: fadeIn 1s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    
+    .scroll-animation {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 1s;
+    }
+    
+    .scroll-animation.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<!-- JavaScript para animações de scroll -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Função para verificar elementos visíveis no scroll
+        function checkScroll() {
+            var elements = document.querySelectorAll('.scroll-animation');
+            var windowHeight = window.innerHeight;
+            
+            elements.forEach(function(element) {
+                var position = element.getBoundingClientRect().top;
+                if(position < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+        
+        // Verifica elementos visíveis ao carregar a página
+        checkScroll();
+        
+        // Verifica elementos visíveis durante o scroll
+        window.addEventListener('scroll', checkScroll);
+    });
+</script>
+{% endblock %}

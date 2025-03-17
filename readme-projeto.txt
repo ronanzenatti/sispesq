@@ -108,7 +108,7 @@ flask inicializar_db
 
 7. Crie um usuário administrador
 ```bash
-flask criar_admin admin@example.com senha123 "Nome do Administrador"
+flask criar_admin admin@sispesq.com admin123 "Administrador do Sistema"
 ```
 
 8. Execute a aplicação

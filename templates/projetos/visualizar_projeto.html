@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Visualizar Projeto{% endblock %}
+{% block title %}{{ projeto.nome }} | SisPesq{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,209 +17,356 @@
 
 <div class="row">
     <div class="col-md-8">
+        <!-- Card de Informações do Projeto -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">Informações do Projeto</h5>
                 <span
-                    class="badge {% if projeto.status == 'Em andamento' %}bg-primary{% elif projeto.status == 'Concluído' %}bg-success{% else %}bg-secondary{% endif %}">
+                    class="badge {% if projeto.status == 'Em andamento' %}bg-primary{% elif projeto.status == 'Concluído' %}bg-success{% elif projeto.status == 'Suspenso' %}bg-warning text-dark{% elif projeto.status == 'Cancelado' %}bg-danger{% elif projeto.status == 'Em planejamento' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
                     {{ projeto.status }}
                 </span>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Área de Conhecimento:</strong> {{ projeto.area_conhecimento }}</p>
-                        <p><strong>Data de Início:</strong> {{ projeto.data_inicio.strftime('%d/%m/%Y') }}</p>
-                        <p><strong>Data de Término:</strong>
+                        <p><strong><i class="bi bi-tag"></i> Área de Conhecimento:</strong> {{ projeto.area_conhecimento }}</p>
+                        <p><strong><i class="bi bi-calendar-check"></i> Data de Início:</strong> {{ projeto.data_inicio.strftime('%d/%m/%Y') }}</p>
+                        <p><strong><i class="bi bi-calendar-x"></i> Data de Término:</strong>
                             {% if projeto.data_fim %}
-                            {{ projeto.data_fim.strftime('%d/%m/%Y') }}
+                                {{ projeto.data_fim.strftime('%d/%m/%Y') }}
+                                {% set dias_restantes = (projeto.data_fim - now().date()).days %}
+                                {% if dias_restantes > 0 %}
+                                    <span class="badge bg-info">Faltam {{ dias_restantes }} dias</span>
+                                {% elif dias_restantes == 0 %}
+                                    <span class="badge bg-warning text-dark">Termina hoje</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Prazo excedido em {{ abs(dias_restantes) }} dias</span>
+                                {% endif %}
                             {% else %}
-                            Não definida
+                                <span class="text-muted">Não definida</span>
                             {% endif %}
                         </p>
+                        {% if projeto.data_lembrete %}
+                            <p><strong><i class="bi bi-bell"></i> Lembrete:</strong> {{ projeto.data_lembrete.strftime('%d/%m/%Y') }}</p>
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Instituição:</strong> {{ projeto.instituicao.nome if projeto.instituicao else 'Não
-                            definida' }}</p>
-                        <p><strong>Criado em:</strong> {{ projeto.data_criacao.strftime('%d/%m/%Y') }}</p>
-                        <p><strong>Última atualização:</strong> {{ projeto.data_atualizacao.strftime('%d/%m/%Y') }}</p>
+                        <p><strong><i class="bi bi-building"></i> Instituição:</strong> 
+                            {% if projeto.instituicao %}
+                                {{ projeto.instituicao.sigla }} - {{ projeto.instituicao.nome }}
+                            {% else %}
+                                <span class="text-muted">Não definida</span>
+                            {% endif %}
+                        </p>
+                        
+                        {% if projeto.financiamento %}
+                            <p><strong><i class="bi bi-cash-coin"></i> Financiamento:</strong> {{ projeto.financiamento }}</p>
+                        {% endif %}
+                        
+                        {% if projeto.valor_financiamento > 0 %}
+                            <p><strong><i class="bi bi-currency-dollar"></i> Valor:</strong> R$ {{ '%.2f'|format(projeto.valor_financiamento)|replace('.', ',') }}</p>
+                        {% endif %}
+                        
+                        {% if projeto.avaliacao > 0 %}
+                            <p><strong><i class="bi bi-star"></i> Avaliação:</strong> 
+                                <span class="text-warning">
+                                    {% for i in range(5) %}
+                                        {% if i < projeto.avaliacao|int %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% elif i < (projeto.avaliacao|int + 0.5) and (projeto.avaliacao % 1) >= 0.5 %}
+                                            <i class="bi bi-star-half"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    ({{ projeto.avaliacao }})
+                                </span>
+                            </p>
+                        {% endif %}
+                        
+                        <p><strong><i class="bi bi-clock-history"></i> Criado em:</strong> {{ projeto.data_criacao.strftime('%d/%m/%Y') }}</p>
+                        <p><strong><i class="bi bi-arrow-clockwise"></i> Atualizado em:</strong> {{ projeto.data_atualizacao.strftime('%d/%m/%Y às %H:%M') }}</p>
                     </div>
                 </div>
 
-                <h6>Descrição:</h6>
-                <p>{{ projeto.descricao }}</p>
+                <h6 class="mt-4 mb-2"><i class="bi bi-file-text"></i> Descrição:</h6>
+                <div class="p-3 bg-light rounded">
+                    {{ projeto.descricao|replace('\n', '<br>')|safe }}
+                </div>
+                
+                {% if projeto.criador %}
+                    <p class="mt-3"><strong><i class="bi bi-person-check"></i> Criado por:</strong> {{ projeto.criador.nome }}</p>
+                {% endif %}
             </div>
         </div>
 
+        <!-- Card de Pesquisadores -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Pesquisadores</h5>
+                <h5 class="card-title mb-0"><i class="bi bi-people"></i> Pesquisadores</h5>
                 <a href="{{ url_for('adicionar_pesquisador', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-person-plus"></i> Adicionar
                 </a>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Função</th>
-                                <th>Instituição</th>
-                                <th>Data de Entrada</th>
-                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
-                                <th>Ações</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pesquisador, funcao, data_entrada in pesquisadores_projeto %}
-                            <tr>
-                                <td>{{ pesquisador.nome }}</td>
-                                <td>{{ funcao }}</td>
-                                <td>{{ pesquisador.instituicao.sigla if pesquisador.instituicao else '' }}</td>
-                                <td>{{ data_entrada.strftime('%d/%m/%Y') }}</td>
-                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
-                                <td>                                    
-                                        <button type="button" class="btn btn-warning btn-sm" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#editarFuncaoModal"
-                                                data-pesquisador-id="{{ pesquisador.id }}"
-                                                data-pesquisador-nome="{{ pesquisador.nome }}"
-                                                data-funcao-atual="{{ funcao }}">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        
-                                        {% if pesquisador.id != projeto.criador_id %}
-                                        <form method="post" action="{{ url_for('remover_pesquisador', projeto_id=projeto.id, pesquisador_id=pesquisador.id) }}" 
-                                              style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este pesquisador do projeto?');">
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-person-dash-fill"></i>
-                                            </button>
-                                        </form>
+                {% if pesquisadores_projeto %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Função</th>
+                                    <th>Instituição</th>
+                                    <th>Data de Entrada</th>
+                                    {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                        <th class="text-center">Ações</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pesquisador, funcao, data_entrada in pesquisadores_projeto %}
+                                    <tr>
+                                        <td>
+                                            {{ pesquisador.nome }}
+                                            {% if projeto.criador_id == pesquisador.id %}
+                                                <span class="badge bg-primary">Coordenador</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ funcao }}</td>
+                                        <td>{{ pesquisador.instituicao.sigla if pesquisador.instituicao else '' }}</td>
+                                        <td>{{ data_entrada.strftime('%d/%m/%Y') }}</td>
+                                        {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-primary" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editarFuncaoModal"
+                                                            data-pesquisador-id="{{ pesquisador.id }}"
+                                                            data-pesquisador-nome="{{ pesquisador.nome }}"
+                                                            data-funcao-atual="{{ funcao }}">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                    
+                                                    {% if pesquisador.id != projeto.criador_id %}
+                                                        <form method="post" action="{{ url_for('remover_pesquisador', projeto_id=projeto.id, pesquisador_id=pesquisador.id) }}" 
+                                                            style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este pesquisador do projeto?');">
+                                                            <button type="submit" class="btn btn-outline-danger">
+                                                                <i class="bi bi-person-dash-fill"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
                                         {% endif %}
-                                </td>
-                                {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Nenhum pesquisador está associado a este projeto.
+                    </div>
+                {% endif %}
             </div>
-        </div>
-        
-        <!-- Modal para editar função do pesquisador -->
-        <div class="modal fade" id="editarFuncaoModal" tabindex="-1" aria-labelledby="editarFuncaoModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editarFuncaoModalLabel">Editar Função do Pesquisador</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <form id="formEditarFuncao" method="post">
-                <div class="modal-body">
-                  <p>Editando função de: <strong id="pesquisadorNome"></strong></p>
-                  
-                  <div class="mb-3">
-                    <label for="funcao" class="form-label">Função no Projeto</label>
-                    <select class="form-select" id="funcao" name="funcao" required>
-                        <option value="Coordenador">Coordenador</option>
-                        <option value="Pesquisador">Pesquisador</option>
-                        <option value="Colaborador">Colaborador</option>
-                        <option value="Bolsista">Bolsista</option>
-                        <option value="Orientando">Orientando</option>
-                        <option value="Coorientador">Coorientador</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-              </form>
-            </div>
-          </div>
         </div>
     </div>
 
     <div class="col-md-4">
+        <!-- Card de Eventos -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Eventos</h5>
+                <h5 class="card-title mb-0"><i class="bi bi-calendar-event"></i> Eventos</h5>
                 <a href="{{ url_for('adicionar_evento', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus"></i> Adicionar
                 </a>
             </div>
             <div class="card-body">
                 {% if projeto.eventos %}
-                <ul class="list-group">
-                    {% for evento in projeto.eventos %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">{{ evento.nome }}</h6>
+                    <div class="list-group">
+                        {% for evento in projeto.eventos %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ evento.nome }}</h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('visualizar_evento', evento_id=evento.id) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        
+                                        {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                            <a href="{{ url_for('editar_evento', evento_id=evento.id) }}" class="btn btn-outline-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            
+                                            <form method="post" action="{{ url_for('remover_evento_projeto', projeto_id=projeto.id, evento_id=evento.id) }}" 
+                                                style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este evento do projeto?');">
+                                                <button type="submit" class="btn btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
                                 <p class="mb-1"><small class="text-muted">{{ evento.tipo }}</small></p>
-                                <p class="mb-1">{{ evento.data_inicio.strftime('%d/%m/%Y') }}
-                                    {% if evento.data_fim %}
-                                    - {{ evento.data_fim.strftime('%d/%m/%Y') }}
-                                    {% endif %}
-                                </p>
-                                <p class="mb-0"><small>{{ evento.cidade }}/{{ evento.estado }}</small></p>
-                            </div>
-                            
-                            <div class="btn-group-vertical btn-group-sm">
-                                <a href="{{ url_for('visualizar_evento', evento_id=evento.id) }}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                
-                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
-                                <a href="{{ url_for('editar_evento', evento_id=evento.id) }}" class="btn btn-warning  btn-sm">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                
-                                <form method="post" action="{{ url_for('remover_evento_projeto', projeto_id=projeto.id, evento_id=evento.id) }}" 
-                                      style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este evento do projeto?');">
-                                    <button type="submit" class="btn btn-danger  btn-sm">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small>
+                                        <i class="bi bi-calendar"></i> {{ evento.data_inicio.strftime('%d/%m/%Y') }}
+                                        {% if evento.data_fim %}
+                                            a {{ evento.data_fim.strftime('%d/%m/%Y') }}
+                                        {% endif %}
+                                    </small>
+                                    <small>
+                                        <i class="bi bi-geo-alt"></i> {{ evento.cidade }}/{{ evento.estado }}
+                                    </small>
+                                </div>
+                                {% if evento.qualis %}
+                                    <span class="badge bg-success mt-1">Qualis {{ evento.qualis }}</span>
                                 {% endif %}
                             </div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                <p class="text-muted">Nenhum evento registrado.</p>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Nenhum evento registrado.
+                    </div>
                 {% endif %}
             </div>
         </div>
 
+        <!-- Card de Referências -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Referências</h5>
+                <h5 class="card-title mb-0"><i class="bi bi-journal-text"></i> Referências</h5>
                 <a href="{{ url_for('adicionar_referencia', projeto_id=projeto.id) }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus"></i> Adicionar
                 </a>
             </div>
             <div class="card-body">
                 {% if projeto.referencias %}
-                <ul class="list-group">
-                    {% for ref in projeto.referencias %}
-                    <li class="list-group-item">
-                        <p class="mb-1"><strong>{{ ref.titulo }}</strong></p>
-                        <p class="mb-1">{{ ref.autores }}</p>
-                        <p class="mb-0"><small class="text-muted">{{ ref.publicacao }}, {{ ref.ano }}</small></p>
-                        {% if ref.doi %}
-                        <p class="mb-0"><small>DOI: {{ ref.doi }}</small></p>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
+                    <div class="list-group">
+                        {% for ref in projeto.referencias %}
+                            <div class="list-group-item">
+                                <h6 class="mb-1">{{ ref.titulo }}</h6>
+                                <p class="mb-1 text-muted">{{ ref.autores }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ ref.publicacao }}, {{ ref.ano }}</small>
+                                    <span class="badge bg-secondary">{{ ref.tipo }}</span>
+                                </div>
+                                {% if ref.doi %}
+                                    <small class="d-block mt-1">
+                                        <strong>DOI:</strong> 
+                                        <a href="https://doi.org/{{ ref.doi }}" target="_blank">{{ ref.doi }}</a>
+                                    </small>
+                                {% endif %}
+                                {% if ref.url %}
+                                    <small class="d-block mt-1">
+                                        <a href="{{ ref.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-link"></i> Acessar
+                                        </a>
+                                    </small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                <p class="text-muted">Nenhuma referência registrada.</p>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Nenhuma referência registrada.
+                    </div>
                 {% endif %}
             </div>
+        </div>
+        
+        <!-- Card de Cronograma (Sugestão) -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-calendar3"></i> Cronograma</h5>
+            </div>
+            <div class="card-body">
+                {% if projeto.data_inicio and projeto.data_fim %}
+                    {% set duracao_total = (projeto.data_fim - projeto.data_inicio).days %}
+                    {% set dias_passados = (now().date() - projeto.data_inicio).days %}
+                    {% set porcentagem = (dias_passados / duracao_total * 100)|round if duracao_total > 0 else 0 %}
+                    
+                    <div class="text-center mb-3">
+                        <span class="d-block mb-2">Progresso do Projeto</span>
+                        <div class="progress" style="height: 20px;">
+                            {% if porcentagem > 100 %}
+                                {% set width = 100 %}
+                            {% else %}
+                                {% set width = porcentagem %}
+                            {% endif %}
+                            <div class="progress-bar {% if porcentagem > 100 %}bg-danger{% elif porcentagem > 80 %}bg-warning{% else %}bg-success{% endif %}" 
+                                role="progressbar" style="width: {{ width }}%;" 
+                                aria-valuenow="{{ porcentagem }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ porcentagem|int }}%
+                            </div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            {% if projeto.status == 'Concluído' %}
+                                Projeto concluído
+                            {% elif dias_passados < 0 %}
+                                Projeto inicia em {{ abs(dias_passados) }} dias
+                            {% elif porcentagem > 100 %}
+                                Prazo excedido em {{ dias_passados - duracao_total }} dias
+                            {% else %}
+                                {{ dias_passados }} de {{ duracao_total }} dias ({{ duracao_total - dias_passados }} restantes)
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="p-2 border rounded">
+                                <h6>Início</h6>
+                                <p class="mb-0">{{ projeto.data_inicio.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 border rounded">
+                                <h6>Término</h6>
+                                <p class="mb-0">{{ projeto.data_fim.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> É necessário definir as datas de início e término para visualizar o cronograma.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar função do pesquisador -->
+<div class="modal fade" id="editarFuncaoModal" tabindex="-1" aria-labelledby="editarFuncaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarFuncaoModalLabel">Editar Função do Pesquisador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditarFuncao" method="post">
+                <div class="modal-body">
+                    <p>Editando função de: <strong id="pesquisadorNome"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="funcao" class="form-label">Função no Projeto</label>
+                        <select class="form-select" id="funcao" name="funcao" required>
+                            <option value="Coordenador">Coordenador</option>
+                            <option value="Pesquisador">Pesquisador</option>
+                            <option value="Colaborador">Colaborador</option>
+                            <option value="Bolsista">Bolsista</option>
+                            <option value="Orientando">Orientando</option>
+                            <option value="Coorientador">Coorientador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -227,37 +374,43 @@
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Configurar o modal quando for aberto
-    const editarFuncaoModal = document.getElementById('editarFuncaoModal');
-    if (editarFuncaoModal) {
-      editarFuncaoModal.addEventListener('show.bs.modal', function (event) {
-        // Botão que acionou o modal
-        const button = event.relatedTarget;
-        
-        // Extrair informações dos atributos data-*
-        const pesquisadorId = button.getAttribute('data-pesquisador-id');
-        const pesquisadorNome = button.getAttribute('data-pesquisador-nome');
-        const funcaoAtual = button.getAttribute('data-funcao-atual');
-        
-        // Atualizar conteúdo do modal
-        const modal = this;
-        modal.querySelector('#pesquisadorNome').textContent = pesquisadorNome;
-        
-        // Selecionar a função atual no select
-        const selectFuncao = modal.querySelector('#funcao');
-        for(let i = 0; i < selectFuncao.options.length; i++) {
-          if(selectFuncao.options[i].value === funcaoAtual) {
-            selectFuncao.selectedIndex = i;
-            break;
-          }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar o modal quando for aberto
+        const editarFuncaoModal = document.getElementById('editarFuncaoModal');
+        if (editarFuncaoModal) {
+            editarFuncaoModal.addEventListener('show.bs.modal', function (event) {
+                // Botão que acionou o modal
+                const button = event.relatedTarget;
+                
+                // Extrair informações dos atributos data-*
+                const pesquisadorId = button.getAttribute('data-pesquisador-id');
+                const pesquisadorNome = button.getAttribute('data-pesquisador-nome');
+                const funcaoAtual = button.getAttribute('data-funcao-atual');
+                
+                // Atualizar conteúdo do modal
+                const modal = this;
+                modal.querySelector('#pesquisadorNome').textContent = pesquisadorNome;
+                
+                // Selecionar a função atual no select
+                const selectFuncao = modal.querySelector('#funcao');
+                for(let i = 0; i < selectFuncao.options.length; i++) {
+                    if(selectFuncao.options[i].value === funcaoAtual) {
+                        selectFuncao.selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                // Atualizar o action do formulário
+                const form = modal.querySelector('#formEditarFuncao');
+                form.action = "{{ url_for('atualizar_funcao_pesquisador', projeto_id=projeto.id, pesquisador_id=0) }}".replace('/0', '/' + pesquisadorId);
+            });
         }
         
-        // Atualizar o action do formulário
-        const form = modal.querySelector('#formEditarFuncao');
-        form.action = "{{ url_for('atualizar_funcao_pesquisador', projeto_id=projeto.id, pesquisador_id=0) }}".replace('/0', '/' + pesquisadorId);
-      });
-    }
-  });
+        // Ativar tooltips se estiverem sendo usados
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 </script>
 {% endblock %}

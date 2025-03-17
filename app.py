@@ -88,23 +88,22 @@ class Pesquisador(db.Model):
     projetos = db.relationship('Projeto', secondary=projeto_pesquisador,
                                backref=db.backref('pesquisadores', lazy='dynamic'))
     
-    instituicao = db.relationship('Instituicao')
+    instituicao = db.relationship('Instituicao', back_populates="pesquisadores", overlaps="instituicao_ref")
 
-
-# Modelo para Instituições
+# Modificar a classe Instituicao
 class Instituicao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     sigla = db.Column(db.String(20))
-    tipo = db.Column(db.String(50))  # Universidade, Instituto de Pesquisa, etc.
+    tipo = db.Column(db.String(50))
     endereco = db.Column(db.String(200))
     cidade = db.Column(db.String(100))
     estado = db.Column(db.String(2))
     cep = db.Column(db.String(10))
     pais = db.Column(db.String(50), default="Brasil")
     
-    pesquisadores = db.relationship('Pesquisador', backref='instituicao_ref')
-
+    # Modificar este relacionamento para resolver o aviso
+    pesquisadores = db.relationship('Pesquisador', back_populates="instituicao", overlaps="instituicao")
 
 # Modelo para Projetos (normalizado da tabela original)
 class Projeto(db.Model):
@@ -134,7 +133,6 @@ class Projeto(db.Model):
     instituicao = db.relationship('Instituicao')
     criador = db.relationship('Pesquisador', foreign_keys=[criador_id])
 
-
 # Modelo para Eventos
 class Evento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -150,7 +148,6 @@ class Evento(db.Model):
     url = db.Column(db.String(200))
     qualis = db.Column(db.String(5))  # Classificação Qualis (A1, A2, B1, etc.)
 
-
 # Modelo para Referências Bibliográficas
 class Referencia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -165,7 +162,6 @@ class Referencia(db.Model):
     doi = db.Column(db.String(100))
     url = db.Column(db.String(300))
     data_acesso = db.Column(db.Date)
-
 
 # Configuração do login_manager
 @login_manager.user_loader
@@ -378,7 +374,6 @@ def lista_projetos():
                           areas=areas,
                           status_list=status_list)
 
-
 @app.route('/projeto/<int:projeto_id>')
 @login_required
 def visualizar_projeto(projeto_id):
@@ -409,10 +404,13 @@ def visualizar_projeto(projeto_id):
         projeto_pesquisador.c.ativo == True
     ).all()
     
+    # Buscar instituições (necessário para o formulário de edição)
+    instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
+    
     return render_template('projetos/visualizar_projeto.html', 
                           projeto=projeto,
-                          pesquisadores_projeto=pesquisadores_projeto)
-
+                          pesquisadores_projeto=pesquisadores_projeto,
+                          instituicoes=instituicoes)
 
 @app.route('/projeto/novo', methods=['GET', 'POST'])
 @login_required
@@ -421,9 +419,23 @@ def novo_projeto():
         nome = request.form.get('nome')
         descricao = request.form.get('descricao')
         area_conhecimento = request.form.get('area_conhecimento')
+        status = request.form.get('status')
+        instituicao_id = request.form.get('instituicao_id') or None
+        
+        # Processar datas
         data_inicio = datetime.strptime(request.form.get('data_inicio'), '%Y-%m-%d').date()
         data_fim = datetime.strptime(request.form.get('data_fim'), '%Y-%m-%d').date() if request.form.get('data_fim') else None
+        data_lembrete = datetime.strptime(request.form.get('data_lembrete'), '%Y-%m-%d').date() if request.form.get('data_lembrete') else None
         
+        # Processamento dos campos numéricos
+        try:
+            avaliacao = float(request.form.get('avaliacao')) if request.form.get('avaliacao') else 0.0
+            valor_financiamento = float(request.form.get('valor_financiamento')) if request.form.get('valor_financiamento') else 0.0
+        except ValueError:
+            avaliacao = 0.0
+            valor_financiamento = 0.0
+        
+        financiamento = request.form.get('financiamento')
         pesquisador = current_user.pesquisador
         
         # Verificar se já existe projeto com o mesmo nome
@@ -437,14 +449,18 @@ def novo_projeto():
             area_conhecimento=area_conhecimento,
             data_inicio=data_inicio,
             data_fim=data_fim,
-           # instituicao_id=pesquisador.instituicao_id,
+            data_lembrete=data_lembrete,
+            status=status,
+            avaliacao=avaliacao,
+            financiamento=financiamento,
+            valor_financiamento=valor_financiamento,
+            instituicao_id=instituicao_id,
             criador_id=pesquisador.id
         )
         
         db.session.add(novo_projeto)
         db.session.flush()
         
-        # Adicionar o criador como pesquisador do projeto se for um pesquisador
         if not current_user.is_admin:
             stmt = projeto_pesquisador.insert().values(
                 projeto_id=novo_projeto.id,
@@ -460,8 +476,9 @@ def novo_projeto():
         flash('Projeto criado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=novo_projeto.id))
     
-    return render_template('projetos/novo_projeto.html')
-
+    # No caso do método GET, buscar as instituições para o select
+    instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
+    return render_template('projetos/novo_projeto.html', instituicoes=instituicoes)
 
 @app.route('/projeto/<int:projeto_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -477,18 +494,32 @@ def editar_projeto(projeto_id):
         projeto.nome = request.form.get('nome')
         projeto.descricao = request.form.get('descricao')
         projeto.area_conhecimento = request.form.get('area_conhecimento')
+        projeto.status = request.form.get('status')
+        projeto.instituicao_id = request.form.get('instituicao_id') or None
+        
+        # Processar datas
         projeto.data_inicio = datetime.strptime(request.form.get('data_inicio'), '%Y-%m-%d').date()
         projeto.data_fim = datetime.strptime(request.form.get('data_fim'), '%Y-%m-%d').date() if request.form.get('data_fim') else None
-        projeto.status = request.form.get('status')
+        projeto.data_lembrete = datetime.strptime(request.form.get('data_lembrete'), '%Y-%m-%d').date() if request.form.get('data_lembrete') else None
+        
+        # Processamento dos campos numéricos
+        try:
+            projeto.avaliacao = float(request.form.get('avaliacao')) if request.form.get('avaliacao') else 0.0
+            projeto.valor_financiamento = float(request.form.get('valor_financiamento')) if request.form.get('valor_financiamento') else 0.0
+        except ValueError:
+            projeto.avaliacao = 0.0
+            projeto.valor_financiamento = 0.0
+        
+        projeto.financiamento = request.form.get('financiamento')
         
         db.session.commit()
         
         flash('Projeto atualizado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
-    return render_template('projetos/editar_projeto.html', projeto=projeto)
-
-# Substituir a rota existente no arquivo app.py
+    # Buscar instituições para o formulário
+    instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
+    return render_template('projetos/editar_projeto.html', projeto=projeto, instituicoes=instituicoes)
 
 @app.route('/projeto/<int:projeto_id>/adicionar_pesquisador', methods=['GET', 'POST'])
 @login_required

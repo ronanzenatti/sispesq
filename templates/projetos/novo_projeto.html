@@ -15,36 +15,130 @@
     <div class="card-body">
         <form method="post">
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="nome" class="form-label">Nome do Projeto</label>
+                <div class="col-md-8 mb-3">
+                    <label for="nome" class="form-label">Nome do Projeto <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="nome" name="nome" required>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="area_conhecimento" class="form-label">Área de Conhecimento</label>
-                    <input type="text" class="form-control" id="area_conhecimento" name="area_conhecimento" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="data_inicio" class="form-label">Data de Início</label>
-                    <input type="date" class="form-control text-center" id="data_inicio" name="data_inicio" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="data_fim" class="form-label">Data de Término (opcional)</label>
-                    <input type="date" class="form-control text-center" id="data_fim" name="data_fim">
+                <div class="col-md-4 mb-3">
+                    <label for="area_conhecimento" class="form-label">Área de Conhecimento <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="area_conhecimento" name="area_conhecimento" list="areas-conhecimento" required>
+                    <datalist id="areas-conhecimento">
+                        <option value="Ciência da Computação">
+                        <option value="Engenharia de Software">
+                        <option value="Inteligência Artificial">
+                        <option value="Ciência de Dados">
+                        <option value="Sistemas de Informação">
+                        <option value="Bioinformática">
+                        <option value="Física">
+                        <option value="Matemática">
+                        <option value="Química">
+                        <option value="Biologia">
+                        <option value="Medicina">
+                        <option value="Educação">
+                        <option value="Administração">
+                        <option value="Linguística">
+                    </datalist>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="descricao" class="form-label">Descrição</label>
-                <textarea class="form-control" id="descricao" name="descricao" rows="5" required></textarea>
+                <label for="descricao" class="form-label">Descrição <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="4" required></textarea>
             </div>
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Criar Projeto</button>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="instituicao_id" class="form-label">Instituição</label>
+                    <select class="form-select" id="instituicao_id" name="instituicao_id">
+                        <option value="">-- Selecione --</option>
+                        {% for instituicao in instituicoes %}
+                        <option value="{{ instituicao.id }}">{{ instituicao.sigla }} - {{ instituicao.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Suspenso">Suspenso</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Em planejamento">Em planejamento</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="avaliacao" class="form-label">Avaliação (0-5)</label>
+                    <input type="number" class="form-control" id="avaliacao" name="avaliacao" min="0" max="5" step="0.1" value="0">
+                </div>
+            </div>
+
+            <h6 class="mt-4 mb-3">Datas do Projeto</h6>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="data_inicio" class="form-label">Data de Início <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="data_fim" class="form-label">Data de Término Prevista</label>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="data_lembrete" class="form-label">Data de Lembrete</label>
+                    <input type="date" class="form-control" id="data_lembrete" name="data_lembrete">
+                    <div class="form-text">Data para receber um lembrete sobre o projeto</div>
+                </div>
+            </div>
+
+            <h6 class="mt-4 mb-3">Informações de Financiamento</h6>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="financiamento" class="form-label">Fonte de Financiamento</label>
+                    <input type="text" class="form-control" id="financiamento" name="financiamento" list="financiadores">
+                    <datalist id="financiadores">
+                        <option value="CAPES">
+                        <option value="CNPq">
+                        <option value="FAPESP">
+                        <option value="FINEP">
+                        <option value="Recursos Próprios">
+                        <option value="Empresa Privada">
+                    </datalist>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="valor_financiamento" class="form-label">Valor do Financiamento (R$)</label>
+                    <input type="number" class="form-control" id="valor_financiamento" name="valor_financiamento" min="0" step="0.01" value="0">
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Criar Projeto
+                </button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define a data de hoje como padrão para a data de início
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('data_inicio').value = hoje;
+        
+        // Calcular data de término padrão (um ano após a data de início)
+        const dataFim = new Date();
+        dataFim.setFullYear(dataFim.getFullYear() + 1);
+        document.getElementById('data_fim').value = dataFim.toISOString().split('T')[0];
+        
+        // Formatar o campo de valor de financiamento para mostrar como moeda
+        const valorFinanciamento = document.getElementById('valor_financiamento');
+        valorFinanciamento.addEventListener('blur', function() {
+            const valor = parseFloat(this.value);
+            if (!isNaN(valor)) {
+                this.value = valor.toFixed(2);
+            }
+        });
+    });
+</script>
 {% endblock %}

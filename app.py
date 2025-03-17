@@ -12,7 +12,8 @@ import click
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'desenvolvimentotemporario')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///projetos_pesquisa.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///projetos_pesquisa.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///projetos_pesquisa.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -1476,4 +1477,4 @@ def promover_admin(email):
 
 # Executar o aplicativo
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run()

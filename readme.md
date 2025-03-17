@@ -52,7 +52,7 @@ O SisPesq é uma aplicação web desenvolvida para facilitar o gerenciamento de 
 
 3. **Configure o ambiente virtual**
    ```
-   cd C:\projetos\pesquisa-app
+   cd C:\projetos\sispesq
    python -m venv venv
    venv\Scripts\activate
    pip install -r requirements.txt
@@ -63,20 +63,25 @@ O SisPesq é uma aplicação web desenvolvida para facilitar o gerenciamento de 
 1. **Inicialize o banco de dados**
    ```
    set FLASK_APP=app.py
-   flask db init
-   flask db migrate -m "Inicialização do banco de dados"
+   set DATABASE_URL=sqlite:///projetos_pesquisa.db
+   set FLASK_DEBUG=1
+
    flask db upgrade
-   flask inicializar_db
+   flask inicializar_db (opcional)
    ```
+1. **Crie um usuário administrador**
+    ```bash
+    flask criar_admin admin@sispesq.com admin123 "Administrador do Sistema"
+    ```
 
 2. **Execute a aplicação**
    ```
-   python app.py
+   flask run --port=80
    ```
    Ou use o arquivo `iniciar.bat` incluído no projeto.
 
 3. **Acesse a aplicação**
-   - Abra seu navegador e acesse `http://localhost:8080`
+   - Abra seu navegador e acesse `http://localhost:80`
    - Login padrão:
      - E-mail: admin@example.com
      - Senha: admin123

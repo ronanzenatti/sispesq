@@ -18,8 +18,13 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'desenvolvimentotemporar
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///projetos_pesquisa.db'
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///projetos_pesquisa.db')
 # Modifique seu app.py para usar um caminho persistente
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////home/site/wwwroot/database/projetos_pesquisa.db')
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////home/site/wwwroot/database/projetos_pesquisa.db')
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'projetos_pesquisa.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+print(f"Diretório atual: {os.getcwd()}")
+print(f"Caminho completo do banco de dados: {os.path.abspath('projetos_pesquisa.db')}")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

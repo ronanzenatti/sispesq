@@ -3,9 +3,12 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Pesquisadores</h1>
-    <a href="{{ url_for('novo_pesquisador') }}" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Novo Pesquisador
-    </a>
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('novo_pesquisador') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Novo Pesquisador
+        </a>
+    {% endif %}
+
 </div>
 
 <div class="card mb-4">
@@ -74,10 +77,16 @@
             </div>
             <div class="card-footer bg-transparent">
                 <div class="d-grid">
-                    <a href="{{ url_for('perfil', usuario_id=pesquisador.id) }}"
-                        class="btn btn-outline-primary">
-                        <i class="bi bi-eye"></i> Visualizar
-                    </a>
+                    {% if current_user.is_admin or current_user.pesquisador.id == pesquisador.id %}
+                        <a href="{{ url_for('perfil', usuario_id=pesquisador.id) }}"
+                            class="btn btn-outline-primary">
+                            <i class="bi bi-eye"></i> Visualizar / Editar
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary text-center" disabled>
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         </div>

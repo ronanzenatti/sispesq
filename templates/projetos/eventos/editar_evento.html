@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Evento</h1>
+    <a href="{{ url_for('visualizar_evento', evento_id=evento.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Informações do Evento</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="nome" class="form-label">Nome do Evento</label>
+                    <input type="text" class="form-control" id="nome" name="nome" value="{{ evento.nome }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="Conferência" {% if evento.tipo == 'Conferência' %}selected{% endif %}>Conferência</option>
+                        <option value="Congresso" {% if evento.tipo == 'Congresso' %}selected{% endif %}>Congresso</option>
+                        <option value="Simpósio" {% if evento.tipo == 'Simpósio' %}selected{% endif %}>Simpósio</option>
+                        <option value="Workshop" {% if evento.tipo == 'Workshop' %}selected{% endif %}>Workshop</option>
+                        <option value="Seminário" {% if evento.tipo == 'Seminário' %}selected{% endif %}>Seminário</option>
+                        <option value="Outro" {% if evento.tipo == 'Outro' %}selected{% endif %}>Outro</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="3">{{ evento.descricao }}</textarea>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="data_inicio" class="form-label">Data de Início</label>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ evento.data_inicio.strftime('%Y-%m-%d') if evento.data_inicio else '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="data_fim" class="form-label">Data de Término</label>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ evento.data_fim.strftime('%Y-%m-%d') if evento.data_fim else '' }}">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="local" class="form-label">Local</label>
+                    <input type="text" class="form-control" id="local" name="local" value="{{ evento.local }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="url" class="form-label">URL do Evento</label>
+                    <input type="url" class="form-control" id="url" name="url" value="{{ evento.url }}">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="cidade" name="cidade" value="{{ evento.cidade }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="">Selecione...</option>
+                        <option value="AC" {% if evento.estado == 'AC' %}selected{% endif %}>AC</option>
+                        <option value="AL" {% if evento.estado == 'AL' %}selected{% endif %}>AL</option>
+                        <!-- Repita para todos os estados -->
+                        <option value="SP" {% if evento.estado == 'SP' %}selected{% endif %}>SP</option>
+                        <option value="TO" {% if evento.estado == 'TO' %}selected{% endif %}>TO</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="pais" class="form-label">País</label>
+                    <input type="text" class="form-control" id="pais" name="pais" value="{{ evento.pais if evento.pais else 'Brasil' }}">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="qualis" class="form-label">Classificação Qualis</label>
+                <select class="form-select" id="qualis" name="qualis">
+                    <option value="">Não se aplica</option>
+                    <option value="A1" {% if evento.qualis == 'A1' %}selected{% endif %}>A1</option>
+                    <option value="A2" {% if evento.qualis == 'A2' %}selected{% endif %}>A2</option>
+                    <option value="A3" {% if evento.qualis == 'A3' %}selected{% endif %}>A3</option>
+                    <option value="A4" {% if evento.qualis == 'A4' %}selected{% endif %}>A4</option>
+                    <option value="B1" {% if evento.qualis == 'B1' %}selected{% endif %}>B1</option>
+                    <option value="B2" {% if evento.qualis == 'B2' %}selected{% endif %}>B2</option>
+                    <option value="B3" {% if evento.qualis == 'B3' %}selected{% endif %}>B3</option>
+                    <option value="B4" {% if evento.qualis == 'B4' %}selected{% endif %}>B4</option>
+                    <option value="C" {% if evento.qualis == 'C' %}selected{% endif %}>C</option>
+                </select>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

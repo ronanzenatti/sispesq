@@ -28,11 +28,11 @@
                 <h6 class="mt-4 mb-3">Novo Evento</h6>
                 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-8 mb-3">
                         <label for="nome" class="form-label">Nome do Evento</label>
                         <input type="text" class="form-control" id="nome" name="nome">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="tipo" class="form-label">Tipo</label>
                         <select class="form-select" id="tipo" name="tipo">
                             <option value="Conferência">Conferência</option>
@@ -43,6 +43,11 @@
                             <option value="Outro">Outro</option>
                         </select>
                     </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">Descrição</label>
+                    <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
                 </div>
                 
                 <div class="row">
@@ -56,9 +61,75 @@
                     </div>
                 </div>
                 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="local" class="form-label">Local</label>
+                        <input type="text" class="form-control" id="local" name="local">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="url" class="form-label">URL do Evento</label>
+                        <input type="url" class="form-control" id="url" name="url">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="cidade" class="form-label">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" name="cidade">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado" name="estado">
+                            <option value="">Selecione...</option>
+                            <option value="AC">AC</option>
+                            <option value="AL">AL</option>
+                            <option value="AP">AP</option>
+                            <option value="AM">AM</option>
+                            <option value="BA">BA</option>
+                            <option value="CE">CE</option>
+                            <option value="DF">DF</option>
+                            <option value="ES">ES</option>
+                            <option value="GO">GO</option>
+                            <option value="MA">MA</option>
+                            <option value="MT">MT</option>
+                            <option value="MS">MS</option>
+                            <option value="MG">MG</option>
+                            <option value="PA">PA</option>
+                            <option value="PB">PB</option>
+                            <option value="PR">PR</option>
+                            <option value="PE">PE</option>
+                            <option value="PI">PI</option>
+                            <option value="RJ">RJ</option>
+                            <option value="RN">RN</option>
+                            <option value="RS">RS</option>
+                            <option value="RO">RO</option>
+                            <option value="RR">RR</option>
+                            <option value="SC">SC</option>
+                            <option value="SP">SP</option>
+                            <option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="pais" class="form-label">País</label>
+                        <input type="text" class="form-control" id="pais" name="pais" value="Brasil">
+                    </div>
+                </div>
+                
                 <div class="mb-3">
-                    <label for="local" class="form-label">Local</label>
-                    <input type="text" class="form-control" id="local" name="local">
+                    <label for="qualis" class="form-label">Classificação Qualis</label>
+                    <select class="form-select" id="qualis" name="qualis">
+                        <option value="">Não se aplica</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="A3">A3</option>
+                        <option value="A4">A4</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="B3">B3</option>
+                        <option value="B4">B4</option>
+                        <option value="C">C</option>
+                    </select>
                 </div>
             </div>
             

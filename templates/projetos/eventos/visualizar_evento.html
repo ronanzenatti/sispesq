@@ -1,0 +1,92 @@
+{% extends "base.html" %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>{{ evento.nome }}</h1>
+  <div>
+    {% if current_user.is_admin %}
+    <a
+      href="{{ url_for('editar_evento', evento_id=evento.id) }}"
+      class="btn btn-outline-primary"
+    >
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    {% endif %}
+    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Informações do Evento</h5>
+  </div>
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <p><strong>Tipo:</strong> {{ evento.tipo }}</p>
+        <p><strong>Local:</strong> {{ evento.local }}</p>
+        <p>
+          <strong>Cidade/UF:</strong> {{ evento.cidade }}/{{ evento.estado }},
+          {{ evento.pais }}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <p>
+          <strong>Data de Início:</strong> {{
+          evento.data_inicio.strftime('%d/%m/%Y') if evento.data_inicio else
+          'Não definida' }}
+        </p>
+        <p>
+          <strong>Data de Término:</strong> {{
+          evento.data_fim.strftime('%d/%m/%Y') if evento.data_fim else 'Não
+          definida' }}
+        </p>
+        <p>
+          <strong>Classificação Qualis:</strong> {{ evento.qualis if
+          evento.qualis else 'Não informada' }}
+        </p>
+      </div>
+    </div>
+
+    {% if evento.descricao %}
+    <h6>Descrição:</h6>
+    <p>{{ evento.descricao }}</p>
+    {% endif %} {% if evento.url %}
+    <p>
+      <strong>Site do Evento:</strong>
+      <a href="{{ evento.url }}" target="_blank">{{ evento.url }}</a>
+    </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Projetos Associados</h5>
+  </div>
+  <div class="card-body">
+    {% set projetos = evento.projetos.all() %} {% if projetos %}
+    <ul class="list-group">
+      {% for projeto in projetos %}
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <div>
+          <h6 class="mb-0">{{ projeto.nome }}</h6>
+          <small class="text-muted">{{ projeto.area_conhecimento }}</small>
+        </div>
+        <a
+          href="{{ url_for('visualizar_projeto', projeto_id=projeto.id) }}"
+          class="btn btn-sm btn-outline-primary"
+        >
+          <i class="bi bi-eye"></i> Ver Projeto
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Nenhum projeto associado a este evento.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

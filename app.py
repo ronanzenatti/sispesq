@@ -52,6 +52,7 @@ class Usuario(UserMixin, db.Model):
     data_cadastro = db.Column(db.DateTime, default=datetime.now)
     ultimo_acesso = db.Column(db.DateTime)
     ativo = db.Column(db.Boolean, default=True)
+    is_admin = db.Column(db.Boolean, default=False)  # Campo para controle de admin
     
     pesquisador = db.relationship('Pesquisador', backref='usuario', uselist=False)
     
@@ -60,7 +61,6 @@ class Usuario(UserMixin, db.Model):
         
     def check_senha(self, senha):
         return check_password_hash(self.senha_hash, senha)
-
 
 # Modelo para Pesquisadores (normalizado da tabela original)
 class Pesquisador(db.Model):
@@ -161,6 +161,27 @@ class Referencia(db.Model):
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
 
+def check_projeto_permission(projeto_id):
+    """Verifica se o usuário atual tem permissão para acessar/editar o projeto."""
+    projeto = Projeto.query.get_or_404(projeto_id)
+    
+    # Administradores têm acesso total
+    if current_user.is_admin:
+        return True
+    
+    # Verifica se o usuário é o criador ou está na lista de pesquisadores
+    pesquisador = current_user.pesquisador
+    if projeto.criador_id == pesquisador.id:
+        return True
+    
+    # Verificar se é um pesquisador associado ao projeto
+    participacao = db.session.query(projeto_pesquisador).filter(
+        projeto_pesquisador.c.projeto_id == projeto_id,
+        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
+        projeto_pesquisador.c.ativo == True
+    ).first()
+    
+    return participacao is not None
 
 # Rotas
 @app.route('/')
@@ -311,22 +332,24 @@ def dashboard():
                           total_projetos=total_projetos,
                           total_eventos=total_eventos)
 
-
 @app.route('/projetos')
 @login_required
 def lista_projetos():
-    pesquisador = current_user.pesquisador
-    
     # Filtros
     status = request.args.get('status')
     area = request.args.get('area')
     
     # Consulta base
-    """query = Projeto.query.join(projeto_pesquisador).filter(
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
-        projeto_pesquisador.c.ativo == True
-    )"""
-    query = Projeto.query
+    if current_user.is_admin:
+        # Administradores veem todos os projetos
+        query = Projeto.query
+    else:
+        # Usuários normais só veem seus próprios projetos
+        pesquisador = current_user.pesquisador
+        query = Projeto.query.join(projeto_pesquisador).filter(
+            projeto_pesquisador.c.pesquisador_id == pesquisador.id,
+            projeto_pesquisador.c.ativo == True
+        )
     
     # Aplicar filtros
     if status:
@@ -350,18 +373,34 @@ def lista_projetos():
 def visualizar_projeto(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
-    """ # Verificar se o usuário tem acesso ao projeto
-    pesquisador = current_user.pesquisador
-    participacao = db.session.query(projeto_pesquisador).filter(
+    # Verificar se o usuário tem acesso ao projeto
+    if not current_user.is_admin and projeto.criador_id != current_user.pesquisador.id:
+        participacao = db.session.query(projeto_pesquisador).filter(
+            projeto_pesquisador.c.projeto_id == projeto_id,
+            projeto_pesquisador.c.pesquisador_id == current_user.pesquisador.id,
+            projeto_pesquisador.c.ativo == True
+        ).first()
+        
+        if not participacao:
+            flash('Você não tem acesso a este projeto', 'danger')
+            return redirect(url_for('lista_projetos'))
+    
+    # Buscar pesquisadores com suas funções
+    pesquisadores_projeto = db.session.query(
+        Pesquisador, 
+        projeto_pesquisador.c.funcao,
+        projeto_pesquisador.c.data_entrada
+    ).join(
+        projeto_pesquisador, 
+        Pesquisador.id == projeto_pesquisador.c.pesquisador_id
+    ).filter(
         projeto_pesquisador.c.projeto_id == projeto_id,
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id
-    ).first()
+        projeto_pesquisador.c.ativo == True
+    ).all()
     
-    if not participacao:
-        flash('Você não tem acesso a este projeto', 'danger')
-        return redirect(url_for('lista_projetos'))"""
-    
-    return render_template('projetos/visualizar_projeto.html', projeto=projeto)
+    return render_template('projetos/visualizar_projeto.html', 
+                          projeto=projeto,
+                          pesquisadores_projeto=pesquisadores_projeto)
 
 
 @app.route('/projeto/novo', methods=['GET', 'POST'])
@@ -388,22 +427,23 @@ def novo_projeto():
             data_inicio=data_inicio,
             data_fim=data_fim,
            # instituicao_id=pesquisador.instituicao_id,
-           # criador_id=pesquisador.id
+            criador_id=pesquisador.id
         )
         
         db.session.add(novo_projeto)
         db.session.flush()
         
-        """# Adicionar o criador como pesquisador do projeto
-        stmt = projeto_pesquisador.insert().values(
-            projeto_id=novo_projeto.id,
-            pesquisador_id=pesquisador.id,
-            funcao='Coordenador',
-            data_entrada=datetime.now(),
-            ativo=True
-        )
-        db.session.execute(stmt)"""
-        
+        # Adicionar o criador como pesquisador do projeto se for um pesquisador
+        if not current_user.is_admin:
+            stmt = projeto_pesquisador.insert().values(
+                projeto_id=novo_projeto.id,
+                pesquisador_id=pesquisador.id,
+                funcao='Coordenador',
+                data_entrada=datetime.now(),
+                ativo=True
+            )
+            db.session.execute(stmt)
+            
         db.session.commit()
         
         flash('Projeto criado com sucesso!', 'success')
@@ -416,18 +456,11 @@ def novo_projeto():
 @login_required
 def editar_projeto(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
-    """
-    # Verificar se o usuário tem acesso ao projeto como coordenador
-    pesquisador = current_user.pesquisador
-    participacao = db.session.query(projeto_pesquisador).filter(
-        projeto_pesquisador.c.projeto_id == projeto_id,
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
-        projeto_pesquisador.c.funcao == 'Coordenador'
-    ).first()
     
-    if not participacao:
+    # Verificar se o usuário tem permissão para editar
+    if not check_projeto_permission(projeto_id) and not current_user.is_admin:
         flash('Você não tem permissão para editar este projeto', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
     if request.method == 'POST':
         projeto.nome = request.form.get('nome')
@@ -501,6 +534,63 @@ def adicionar_pesquisador(projeto_id):
     
     return render_template('projetos/adicionar_pesquisador.html', projeto=projeto)
 
+@app.route('/projeto/<int:projeto_id>/remover_pesquisador/<int:pesquisador_id>', methods=['POST'])
+@login_required
+def remover_pesquisador(projeto_id, pesquisador_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    pesquisador = Pesquisador.query.get_or_404(pesquisador_id)
+    
+    # Verificar se o usuário atual é admin ou dono do projeto
+    is_owner = projeto.criador_id == current_user.pesquisador.id
+    
+    if not current_user.is_admin and not is_owner:
+        flash('Você não tem permissão para remover pesquisadores deste projeto', 'danger')
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+    
+    # Remover associação do pesquisador ao projeto
+    stmt = projeto_pesquisador.delete().where(
+        db.and_(
+            projeto_pesquisador.c.projeto_id == projeto_id,
+            projeto_pesquisador.c.pesquisador_id == pesquisador_id
+        )
+    )
+    
+    db.session.execute(stmt)
+    db.session.commit()
+    
+    flash(f'Pesquisador removido do projeto com sucesso!', 'success')
+    return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+
+@app.route('/projeto/<int:projeto_id>/atualizar_funcao/<int:pesquisador_id>', methods=['POST'])
+@login_required
+def atualizar_funcao_pesquisador(projeto_id, pesquisador_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    
+    # Verificar se o usuário atual é admin ou dono do projeto
+    is_owner = projeto.criador_id == current_user.pesquisador.id
+    
+    if not current_user.is_admin and not is_owner:
+        flash('Você não tem permissão para alterar funções neste projeto', 'danger')
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+    
+    nova_funcao = request.form.get('funcao')
+    if not nova_funcao:
+        flash('Função não especificada', 'danger')
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+    
+    # Atualizar a função do pesquisador
+    stmt = projeto_pesquisador.update().where(
+        db.and_(
+            projeto_pesquisador.c.projeto_id == projeto_id,
+            projeto_pesquisador.c.pesquisador_id == pesquisador_id
+        )
+    ).values(funcao=nova_funcao)
+    
+    db.session.execute(stmt)
+    db.session.commit()
+    
+    flash('Função do pesquisador atualizada com sucesso!', 'success')
+    return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
 
 @app.route('/projeto/<int:projeto_id>/adicionar_evento', methods=['GET', 'POST'])
 @login_required
@@ -508,16 +598,16 @@ def adicionar_evento(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
     # Verificar se o usuário tem acesso ao projeto
-    """pesquisador = current_user.pesquisador
-    participacao = db.session.query(projeto_pesquisador).filter(
-        projeto_pesquisador.c.projeto_id == projeto_id,
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
-        projeto_pesquisador.c.ativo == True
-    ).first()
-    
-    if not participacao:
-        flash('Você não tem permissão para adicionar eventos a este projeto', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
+    if not current_user.is_admin and projeto.criador_id != current_user.pesquisador.id:
+        participacao = db.session.query(projeto_pesquisador).filter(
+            projeto_pesquisador.c.projeto_id == projeto_id,
+            projeto_pesquisador.c.pesquisador_id == current_user.pesquisador.id,
+            projeto_pesquisador.c.ativo == True
+        ).first()
+        
+        if not participacao:
+            flash('Você não tem permissão para adicionar eventos a este projeto', 'danger')
+            return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
     if request.method == 'POST':
         # Verificar se é um evento existente ou novo
@@ -530,23 +620,45 @@ def adicionar_evento(projeto_id):
             # Novo evento
             nome = request.form.get('nome')
             tipo = request.form.get('tipo')
+            descricao = request.form.get('descricao')
             local = request.form.get('local')
-            data_inicio = datetime.strptime(request.form.get('data_inicio'), '%Y-%m-%d').date()
-            data_fim = datetime.strptime(request.form.get('data_fim'), '%Y-%m-%d').date() if request.form.get('data_fim') else None
+            cidade = request.form.get('cidade')
+            estado = request.form.get('estado')
+            pais = request.form.get('pais', 'Brasil')
+            url = request.form.get('url')
+            qualis = request.form.get('qualis')
             
+            # Processamento das datas
+            data_inicio = None
+            if request.form.get('data_inicio'):
+                data_inicio = datetime.strptime(request.form.get('data_inicio'), '%Y-%m-%d').date()
+                
+            data_fim = None
+            if request.form.get('data_fim'):
+                data_fim = datetime.strptime(request.form.get('data_fim'), '%Y-%m-%d').date()
+            
+            # Criar o novo evento
             evento = Evento(
                 nome=nome,
                 tipo=tipo,
+                descricao=descricao,
                 local=local,
+                cidade=cidade,
+                estado=estado,
+                pais=pais,
                 data_inicio=data_inicio,
-                data_fim=data_fim
+                data_fim=data_fim,
+                url=url,
+                qualis=qualis
             )
             
             db.session.add(evento)
             db.session.flush()
         
         # Adicionar participação no evento
-        data_participacao = datetime.strptime(request.form.get('data_participacao'), '%Y-%m-%d') if request.form.get('data_participacao') else None
+        data_participacao = None
+        if request.form.get('data_participacao'):
+            data_participacao = datetime.strptime(request.form.get('data_participacao'), '%Y-%m-%d')
         
         # Verificar se já existe participação neste evento
         participacao_existente = db.session.query(projeto_evento).filter(
@@ -572,8 +684,102 @@ def adicionar_evento(projeto_id):
     # Lista de eventos existentes para seleção
     eventos = Evento.query.order_by(Evento.nome).all()
     
-    return render_template('projetos/adicionar_evento.html', projeto=projeto, eventos=eventos)
+    return render_template('projetos/eventos/adicionar_evento.html', projeto=projeto, eventos=eventos)
 
+@app.route('/evento/<int:evento_id>')
+@login_required
+def visualizar_evento(evento_id):
+    evento = Evento.query.get_or_404(evento_id)
+    
+    # Verificar se o usuário tem alguma relação com esse evento
+    projeto_relacionado = db.session.query(projeto_evento).filter(
+        projeto_evento.c.evento_id == evento_id
+    ).first()
+    
+    # Se não for admin e não houver projeto relacionado, redirecionar
+    if not current_user.is_admin and not projeto_relacionado:
+        flash('Você não tem permissão para visualizar este evento', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('projetos/eventos/visualizar_evento.html', evento=evento)
+
+@app.route('/evento/<int:evento_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_evento(evento_id):
+    evento = Evento.query.get_or_404(evento_id)
+    
+    # Verificar se o usuário tem permissão (é admin ou criador de algum projeto relacionado)
+    # Buscar projetos relacionados a este evento
+    projetos_ids = db.session.query(projeto_evento.c.projeto_id).filter(
+        projeto_evento.c.evento_id == evento_id
+    ).all()
+    projetos_ids = [p[0] for p in projetos_ids]
+    
+    tem_permissao = False
+    if current_user.is_admin:
+        tem_permissao = True
+    else:
+        for projeto_id in projetos_ids:
+            projeto = Projeto.query.get(projeto_id)
+            if projeto.criador_id == current_user.pesquisador.id:
+                tem_permissao = True
+                break
+    
+    if not tem_permissao:
+        flash('Você não tem permissão para editar este evento', 'danger')
+        return redirect(url_for('visualizar_evento', evento_id=evento_id))
+    
+    if request.method == 'POST':
+        evento.nome = request.form.get('nome')
+        evento.tipo = request.form.get('tipo')
+        evento.descricao = request.form.get('descricao')
+        evento.local = request.form.get('local')
+        evento.cidade = request.form.get('cidade')
+        evento.estado = request.form.get('estado')
+        evento.pais = request.form.get('pais', 'Brasil')
+        evento.url = request.form.get('url')
+        evento.qualis = request.form.get('qualis')
+        
+        # Processamento das datas
+        if request.form.get('data_inicio'):
+            evento.data_inicio = datetime.strptime(request.form.get('data_inicio'), '%Y-%m-%d').date()
+            
+        if request.form.get('data_fim'):
+            evento.data_fim = datetime.strptime(request.form.get('data_fim'), '%Y-%m-%d').date()
+        else:
+            evento.data_fim = None
+        
+        db.session.commit()
+        flash('Evento atualizado com sucesso!', 'success')
+        return redirect(url_for('visualizar_evento', evento_id=evento_id))
+    
+    return render_template('projetos/eventos/editar_evento.html', evento=evento)
+
+@app.route('/projeto/<int:projeto_id>/remover_evento/<int:evento_id>', methods=['POST'])
+@login_required
+def remover_evento_projeto(projeto_id, evento_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    
+    # Verificar se o usuário tem permissão (é admin ou criador do projeto)
+    tem_permissao = current_user.is_admin or projeto.criador_id == current_user.pesquisador.id
+    
+    if not tem_permissao:
+        flash('Você não tem permissão para remover eventos deste projeto', 'danger')
+        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
+    
+    # Remover associação do evento ao projeto
+    stmt = projeto_evento.delete().where(
+        db.and_(
+            projeto_evento.c.projeto_id == projeto_id,
+            projeto_evento.c.evento_id == evento_id
+        )
+    )
+    
+    db.session.execute(stmt)
+    db.session.commit()
+    
+    flash('Evento removido do projeto com sucesso!', 'success')
+    return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
 
 @app.route('/projeto/<int:projeto_id>/adicionar_referencia', methods=['GET', 'POST'])
 @login_required
@@ -681,6 +887,11 @@ def lista_instituicoes():
 @login_required
 def editar_instituicao(instituicao_id):
     instituicao = Instituicao.query.get_or_404(instituicao_id)
+    
+    # Verificar se o usuário é admin
+    if not current_user.is_admin:
+        flash('Você não tem permissão para editar instituições', 'danger')
+        return redirect(url_for('lista_instituicoes'))
 
     if request.method == 'POST':
         instituicao.nome = request.form.get('nome')
@@ -739,6 +950,11 @@ def nova_instituicao():
 @app.route('/perfil/<int:usuario_id>')
 @login_required
 def perfil(usuario_id):
+    # Apenas o próprio usuário ou um admin pode ver o perfil
+    if usuario_id != current_user.id and not current_user.is_admin:
+        flash('Você não tem permissão para acessar este perfil', 'danger')
+        return redirect(url_for('dashboard'))
+        
     usuario = Usuario.query.get_or_404(usuario_id)
     # Total de projetos
     total_projetos = len(usuario.pesquisador.projetos)
@@ -759,6 +975,11 @@ def perfil(usuario_id):
 @app.route('/perfil/editar/<int:usuario_id>', methods=['GET', 'POST'])
 @login_required
 def editar_perfil(usuario_id):
+    # Apenas o próprio usuário ou um admin pode editar o perfil
+    if usuario_id != current_user.id and not current_user.is_admin:
+        flash('Você não tem permissão para editar este perfil', 'danger')
+        return redirect(url_for('dashboard'))
+        
     pesquisador = Usuario.query.get_or_404(usuario_id).pesquisador
     
     if request.method == 'POST':
@@ -776,7 +997,10 @@ def editar_perfil(usuario_id):
         return redirect(url_for('perfil', usuario_id=usuario_id))
     
     instituicoes = Instituicao.query.order_by(Instituicao.nome).all()
-    return render_template('pesquisadores/editar_perfil.html', usuario_id=usuario_id, pesquisador=pesquisador, instituicoes=instituicoes)
+    return render_template('pesquisadores/editar_perfil.html', 
+                          usuario_id=usuario_id, 
+                          pesquisador=pesquisador, 
+                          instituicoes=instituicoes)
 
 
 @app.route('/relatorios')
@@ -1034,7 +1258,7 @@ def inicializar_db():
     db.session.commit()
     
     # Criar usuário admin
-    admin = Usuario(email='admin@example.com')
+    admin = Usuario(email='admin@example.com', is_admin=True)  # Marcar como admin
     admin.set_senha('admin123')
     db.session.add(admin)
     db.session.flush()
@@ -1182,8 +1406,8 @@ def criar_admin(email, senha, nome):
         print(f'Usuário com e-mail {email} já existe.')
         return
     
-    # Criar usuário
-    usuario = Usuario(email=email)
+    # Criar usuário admin
+    usuario = Usuario(email=email, is_admin=True)  # Definir como admin
     usuario.set_senha(senha)
     db.session.add(usuario)
     db.session.flush()
@@ -1198,6 +1422,20 @@ def criar_admin(email, senha, nome):
     db.session.commit()
     
     print(f'Administrador {nome} criado com sucesso!')
+
+@app.cli.command('promover_admin')
+@click.argument('email')
+def promover_admin(email):
+    """Promove um usuário existente a administrador."""
+    usuario = Usuario.query.filter_by(email=email).first()
+    
+    if not usuario:
+        print(f'Usuário com e-mail {email} não encontrado.')
+        return
+    
+    usuario.is_admin = True
+    db.session.commit()
+    print(f'Usuário {email} promovido a administrador com sucesso!')
 
 # Executar o aplicativo
 if __name__ == '__main__':

@@ -67,21 +67,78 @@
                                 <th>Função</th>
                                 <th>Instituição</th>
                                 <th>Data de Entrada</th>
+                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                <th>Ações</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pesquisador in projeto.pesquisadores.all() %}
+                            {% for pesquisador, funcao, data_entrada in pesquisadores_projeto %}
                             <tr>
                                 <td>{{ pesquisador.nome }}</td>
-                                <td>Pesquisador</td>
+                                <td>{{ funcao }}</td>
                                 <td>{{ pesquisador.instituicao.sigla if pesquisador.instituicao else '' }}</td>
-                                <td>Atual</td>
+                                <td>{{ data_entrada.strftime('%d/%m/%Y') }}</td>
+                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                <td>                                    
+                                        <button type="button" class="btn btn-warning btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editarFuncaoModal"
+                                                data-pesquisador-id="{{ pesquisador.id }}"
+                                                data-pesquisador-nome="{{ pesquisador.nome }}"
+                                                data-funcao-atual="{{ funcao }}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        
+                                        {% if pesquisador.id != projeto.criador_id %}
+                                        <form method="post" action="{{ url_for('remover_pesquisador', projeto_id=projeto.id, pesquisador_id=pesquisador.id) }}" 
+                                              style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este pesquisador do projeto?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-person-dash-fill"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
+        
+        <!-- Modal para editar função do pesquisador -->
+        <div class="modal fade" id="editarFuncaoModal" tabindex="-1" aria-labelledby="editarFuncaoModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editarFuncaoModalLabel">Editar Função do Pesquisador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form id="formEditarFuncao" method="post">
+                <div class="modal-body">
+                  <p>Editando função de: <strong id="pesquisadorNome"></strong></p>
+                  
+                  <div class="mb-3">
+                    <label for="funcao" class="form-label">Função no Projeto</label>
+                    <select class="form-select" id="funcao" name="funcao" required>
+                        <option value="Coordenador">Coordenador</option>
+                        <option value="Pesquisador">Pesquisador</option>
+                        <option value="Colaborador">Colaborador</option>
+                        <option value="Bolsista">Bolsista</option>
+                        <option value="Orientando">Orientando</option>
+                        <option value="Coorientador">Coorientador</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
     </div>
 
@@ -98,14 +155,37 @@
                 <ul class="list-group">
                     {% for evento in projeto.eventos %}
                     <li class="list-group-item">
-                        <h6>{{ evento.nome }}</h6>
-                        <p class="mb-1"><small class="text-muted">{{ evento.tipo }}</small></p>
-                        <p class="mb-1">{{ evento.data_inicio.strftime('%d/%m/%Y') }}
-                            {% if evento.data_fim %}
-                            - {{ evento.data_fim.strftime('%d/%m/%Y') }}
-                            {% endif %}
-                        </p>
-                        <p class="mb-0"><small>{{ evento.cidade }}/{{ evento.estado }}</small></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ evento.nome }}</h6>
+                                <p class="mb-1"><small class="text-muted">{{ evento.tipo }}</small></p>
+                                <p class="mb-1">{{ evento.data_inicio.strftime('%d/%m/%Y') }}
+                                    {% if evento.data_fim %}
+                                    - {{ evento.data_fim.strftime('%d/%m/%Y') }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-0"><small>{{ evento.cidade }}/{{ evento.estado }}</small></p>
+                            </div>
+                            
+                            <div class="btn-group-vertical btn-group-sm">
+                                <a href="{{ url_for('visualizar_evento', evento_id=evento.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                
+                                {% if current_user.is_admin or projeto.criador_id == current_user.pesquisador.id %}
+                                <a href="{{ url_for('editar_evento', evento_id=evento.id) }}" class="btn btn-warning  btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                
+                                <form method="post" action="{{ url_for('remover_evento_projeto', projeto_id=projeto.id, evento_id=evento.id) }}" 
+                                      style="display: inline;" onsubmit="return confirm('Tem certeza que deseja remover este evento do projeto?');">
+                                    <button type="submit" class="btn btn-danger  btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>
@@ -143,4 +223,41 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Configurar o modal quando for aberto
+    const editarFuncaoModal = document.getElementById('editarFuncaoModal');
+    if (editarFuncaoModal) {
+      editarFuncaoModal.addEventListener('show.bs.modal', function (event) {
+        // Botão que acionou o modal
+        const button = event.relatedTarget;
+        
+        // Extrair informações dos atributos data-*
+        const pesquisadorId = button.getAttribute('data-pesquisador-id');
+        const pesquisadorNome = button.getAttribute('data-pesquisador-nome');
+        const funcaoAtual = button.getAttribute('data-funcao-atual');
+        
+        // Atualizar conteúdo do modal
+        const modal = this;
+        modal.querySelector('#pesquisadorNome').textContent = pesquisadorNome;
+        
+        // Selecionar a função atual no select
+        const selectFuncao = modal.querySelector('#funcao');
+        for(let i = 0; i < selectFuncao.options.length; i++) {
+          if(selectFuncao.options[i].value === funcaoAtual) {
+            selectFuncao.selectedIndex = i;
+            break;
+          }
+        }
+        
+        // Atualizar o action do formulário
+        const form = modal.querySelector('#formEditarFuncao');
+        form.action = "{{ url_for('atualizar_funcao_pesquisador', projeto_id=projeto.id, pesquisador_id=0) }}".replace('/0', '/' + pesquisadorId);
+      });
+    }
+  });
+</script>
 {% endblock %}

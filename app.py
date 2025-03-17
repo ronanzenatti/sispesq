@@ -10,10 +10,15 @@ from datetime import datetime, timedelta
 import json
 import click
 
+# Adicionar ao início do app.py
+os.makedirs('/home/site/wwwroot/database', exist_ok=True)
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'desenvolvimentotemporario')
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///projetos_pesquisa.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///projetos_pesquisa.db')
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///projetos_pesquisa.db')
+# Modifique seu app.py para usar um caminho persistente
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/site/wwwroot/database/projetos_pesquisa.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)

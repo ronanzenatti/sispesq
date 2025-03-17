@@ -1,5 +1,40 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<style>
+    .card-pesquisador {
+        transition: all 0.3s ease;
+    }
+    
+    .card-pesquisador:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .input-group .btn {
+        z-index: 0;
+    }
+    
+    #dadosPesquisador {
+        animation: fadeIn 0.5s;
+    }
+    
+    #erroPesquisador {
+        animation: shake 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Adicionar Pesquisador ao Projeto</h1>
@@ -13,12 +48,47 @@
         <h5 class="card-title mb-0">Projeto: {{ projeto.nome }}</h5>
     </div>
     <div class="card-body">
-        <form method="post">
-            <div class="mb-3">
-                <label for="email_pesquisador" class="form-label">E-mail do Pesquisador</label>
+        <!-- Campo de busca por e-mail com botão -->
+        <div class="mb-3">
+            <label for="email_pesquisador" class="form-label">E-mail do Pesquisador</label>
+            <div class="input-group">
                 <input type="email" class="form-control" id="email_pesquisador" name="email_pesquisador" required>
-                <div class="form-text">Digite o e-mail do pesquisador cadastrado no sistema.</div>
+                <button type="button" class="btn btn-primary" id="btnBuscarPesquisador">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
             </div>
+            <div class="form-text">Digite o e-mail do pesquisador cadastrado no sistema.</div>
+        </div>
+
+        <!-- Div para exibir os dados do pesquisador encontrado -->
+        <div id="dadosPesquisador" class="mt-4 mb-3" style="display: none;">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Dados do Pesquisador</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nome:</strong> <span id="nomePesquisador"></span></p>
+                            <p><strong>Instituição:</strong> <span id="instituicaoPesquisador"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Área de Atuação:</strong> <span id="areaPesquisador"></span></p>
+                            <p><strong>Titulação:</strong> <span id="titulacaoPesquisador"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Div para exibir erro quando não encontrar pesquisador -->
+        <div id="erroPesquisador" class="alert alert-danger mt-3" style="display: none;">
+            <i class="bi bi-exclamation-triangle-fill"></i> Pesquisador não encontrado. Verifique o e-mail informado.
+        </div>
+
+        <!-- Formulário para adicionar pesquisador -->
+        <form method="post" id="formAdicionarPesquisador">
+            <input type="hidden" id="email_hidden" name="email_pesquisador">
             
             <div class="mb-3">
                 <label for="funcao" class="form-label">Função no Projeto</label>
@@ -32,9 +102,112 @@
             </div>
             
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Adicionar Pesquisador</button>
+                <button type="submit" class="btn btn-primary" id="btnAdicionarPesquisador" disabled>
+                    <i class="bi bi-person-plus"></i> Adicionar Pesquisador
+                </button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos do DOM
+        const btnBuscar = document.getElementById('btnBuscarPesquisador');
+        const emailInput = document.getElementById('email_pesquisador');
+        const emailHidden = document.getElementById('email_hidden');
+        const dadosPesquisador = document.getElementById('dadosPesquisador');
+        const erroPesquisador = document.getElementById('erroPesquisador');
+        const btnAdicionar = document.getElementById('btnAdicionarPesquisador');
+        const formAdicionar = document.getElementById('formAdicionarPesquisador');
+        
+        // Campos para exibir os dados do pesquisador
+        const nomePesquisador = document.getElementById('nomePesquisador');
+        const instituicaoPesquisador = document.getElementById('instituicaoPesquisador');
+        const areaPesquisador = document.getElementById('areaPesquisador');
+        const titulacaoPesquisador = document.getElementById('titulacaoPesquisador');
+        
+        // Função para buscar pesquisador
+        btnBuscar.addEventListener('click', function() {
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                alert('Por favor, informe o e-mail do pesquisador');
+                return;
+            }
+            
+            // Simular busca (Em produção, isto seria uma chamada AJAX para o servidor)
+            // Por enquanto vamos simular com uma busca fictícia
+            buscarPesquisador(email);
+        });
+        
+        // Função para simular busca do pesquisador
+        function buscarPesquisador(email) {
+            // Mostrar um indicador de carregamento
+            dadosPesquisador.style.display = 'none';
+            erroPesquisador.style.display = 'none';
+            btnAdicionar.disabled = true;
+            
+            // Mostrar um indicador de carregamento
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'loadingIndicator';
+            loadingIndicator.className = 'text-center my-3';
+            loadingIndicator.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div><p class="mt-2">Buscando pesquisador...</p>';
+            
+            // Inserir após o campo de e-mail
+            emailInput.parentNode.parentNode.insertAdjacentElement('afterend', loadingIndicator);
+            
+            // Fazer a requisição AJAX para o servidor
+            fetch(`/api/buscar_pesquisador?email=${encodeURIComponent(email)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Pesquisador não encontrado');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Pesquisador encontrado
+                    nomePesquisador.textContent = data.nome;
+                    instituicaoPesquisador.textContent = data.instituicao || 'Não informada';
+                    areaPesquisador.textContent = data.area_atuacao || 'Não informada';
+                    titulacaoPesquisador.textContent = data.titulacao || 'Não informada';
+                    
+                    // Mostrar os dados e habilitar o botão de adicionar
+                    dadosPesquisador.style.display = 'block';
+                    erroPesquisador.style.display = 'none';
+                    btnAdicionar.disabled = false;
+                    
+                    // Armazenar o email no campo hidden para o formulário
+                    emailHidden.value = email;
+                })
+                .catch(error => {
+                    console.error('Erro na busca:', error);
+                    // Pesquisador não encontrado
+                    dadosPesquisador.style.display = 'none';
+                    erroPesquisador.style.display = 'block';
+                    btnAdicionar.disabled = true;
+                })
+                .finally(() => {
+                    // Remover o indicador de carregamento
+                    document.getElementById('loadingIndicator')?.remove();
+                });
+        }
+        
+        // Quando o formulário for enviado
+        formAdicionar.addEventListener('submit', function(event) {
+            // Em um caso real, o formulário seria enviado normalmente
+            // Aqui estamos apenas garantindo que o e-mail seja passado corretamente
+            if (emailHidden.value) {
+                // O formulário continuaria normalmente
+                // No ambiente de produção, remova este event.preventDefault()
+                // event.preventDefault(); // Remover esta linha em produção
+            } else {
+                event.preventDefault();
+                alert('Por favor, busque um pesquisador válido primeiro.');
+            }
+        });
+    });
+</script>
 {% endblock %}

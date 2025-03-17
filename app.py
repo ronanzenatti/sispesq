@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -477,23 +477,24 @@ def editar_projeto(projeto_id):
     
     return render_template('projetos/editar_projeto.html', projeto=projeto)
 
+# Substituir a rota existente no arquivo app.py
 
 @app.route('/projeto/<int:projeto_id>/adicionar_pesquisador', methods=['GET', 'POST'])
 @login_required
 def adicionar_pesquisador(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
-    """ # Verificar se o usuário é coordenador do projeto
-    pesquisador = current_user.pesquisador
-    participacao = db.session.query(projeto_pesquisador).filter(
-        projeto_pesquisador.c.projeto_id == projeto_id,
-        projeto_pesquisador.c.pesquisador_id == pesquisador.id,
-        projeto_pesquisador.c.funcao == 'Coordenador'
-    ).first()
-    
-    if not participacao:
-        flash('Apenas o coordenador pode adicionar pesquisadores', 'danger')
-        return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))"""
+    # Verificar se o usuário tem permissão para adicionar pesquisadores
+    if not current_user.is_admin and projeto.criador_id != current_user.pesquisador.id:
+        participacao = db.session.query(projeto_pesquisador).filter(
+            projeto_pesquisador.c.projeto_id == projeto_id,
+            projeto_pesquisador.c.pesquisador_id == current_user.pesquisador.id,
+            projeto_pesquisador.c.ativo == True
+        ).first()
+        
+        if not participacao:
+            flash('Você não tem permissão para adicionar pesquisadores a este projeto', 'danger')
+            return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
     if request.method == 'POST':
         email_pesquisador = request.form.get('email_pesquisador')
@@ -529,7 +530,7 @@ def adicionar_pesquisador(projeto_id):
         db.session.execute(stmt)
         db.session.commit()
         
-        flash('Pesquisador adicionado com sucesso!', 'success')
+        flash(f'Pesquisador {novo_pesquisador.nome} adicionado com sucesso!', 'success')
         return redirect(url_for('visualizar_projeto', projeto_id=projeto_id))
     
     return render_template('projetos/adicionar_pesquisador.html', projeto=projeto)
@@ -1008,6 +1009,42 @@ def editar_perfil(usuario_id):
 def relatorios():
     return render_template('relatorios.html')
 
+# Adicione esta rota ao seu arquivo app.py
+
+@app.route('/api/buscar_pesquisador')
+@login_required
+def api_buscar_pesquisador():
+    """
+    API para buscar pesquisador por e-mail.
+    Retorna um JSON com os dados do pesquisador se encontrado,
+    ou um erro 404 caso contrário.
+    """
+    email = request.args.get('email')
+    
+    if not email:
+        return jsonify({'erro': 'E-mail não fornecido'}), 400
+    
+    # Buscar o usuário pelo e-mail
+    usuario = Usuario.query.filter_by(email=email).first()
+    
+    if not usuario or not usuario.pesquisador:
+        return jsonify({'erro': 'Pesquisador não encontrado'}), 404
+    
+    # Obter dados do pesquisador
+    pesquisador = usuario.pesquisador
+    
+    # Preparar resposta
+    resultado = {
+        'id': pesquisador.id,
+        'nome': pesquisador.nome,
+        'titulacao': pesquisador.titulacao,
+        'area_atuacao': pesquisador.area_atuacao,
+        'instituicao': pesquisador.instituicao.nome if pesquisador.instituicao else None,
+        'instituicao_id': pesquisador.instituicao_id,
+        'departamento': pesquisador.departamento
+    }
+    
+    return jsonify(resultado)
 
 @app.route('/api/projetos/estatisticas')
 @login_required
